@@ -5,241 +5,142 @@
 \usepackage[latin1]{inputenc}
 \usepackage[swedish,english]{babel}
 \usepackage{modifications}
-\title{Weakly Supervised Object Detection}
+
+\usepackage{graphicx}
+
+% Put title here
+\title{Weakly Supervised Object Detection: (Working title)}
 
 \subtitle{Duis autem vel eum iruire dolor in hendrerit in
           vulputate velit esse molestie consequat, vel illum
           dolore eu feugiat null}
 \foreigntitle{Lorem ipsum dolor sit amet, sed diam nonummy nibh eui
               mod tincidunt ut laoreet dol}
-\author{Namn Namnet}
-\date{November 2003}
+              
+\author{Muhammad Iqbal Tawakal}
+
+\date{2015}
 \blurb{Master's Thesis at NADA\\Supervisor: Tjoho\\Examiner: Tjohej}
 \trita{TRITA xxx yyyy-nn}
+
 \begin{document}
 \frontmatter
 \pagestyle{empty}
 \removepagenumbers
 \maketitle
 \selectlanguage{english}
+
 \begin{abstract}
   This is a skeleton for KTH theses. More documentation
-  regarding the KTH thesis class file can be found in
+  regardings the KTH thesis class file can be found in
   the package documentation.
-
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris
-purus. Fusce tempor. Nulla facilisi. Sed at turpis. Phasellus eu
-ipsum. Nam porttitor laoreet nulla. Phasellus massa massa, auctor
-rutrum, vehicula ut, porttitor a, massa. Pellentesque fringilla. Duis
-nibh risus, venenatis ac, tempor sed, vestibulum at, tellus. Class
-aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos hymenaeos.
+  
+  Weakly supervised object detection is...
 \end{abstract}
+
 \clearpage
 \begin{foreignabstract}{swedish}
   Denna fil ger ett avhandlingsskelett.
   Mer information om \LaTeX-mallen finns i
   dokumentationen till paketet.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris
-purus. Fusce tempor. Nulla facilisi. Sed at turpis. Phasellus eu
-ipsum. Nam porttitor laoreet nulla. Phasellus massa massa, auctor
-rutrum, vehicula ut, porttitor a, massa. Pellentesque fringilla. Duis
-nibh risus, venenatis ac, tempor sed, vestibulum at, tellus. Class
-aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos hymenaeos.
 \end{foreignabstract}
 \clearpage
 \tableofcontents*
 \mainmatter
 \pagestyle{newchap}
+
+
 \chapter{Introduction}
+\label{chap:intro}
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris
-purus. Fusce tempor. Nulla facilisi. Sed at turpis. Phasellus eu
-ipsum. Nam porttitor laoreet nulla. Phasellus massa massa, auctor
-rutrum, vehicula ut, porttitor a, massa. Pellentesque fringilla. Duis
-nibh risus, venenatis ac, tempor sed, vestibulum at, tellus. Class
-aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos hymenaeos. Aliquam ligula lectus, volutpat in, rutrum sit
-amet, ultrices at, elit. Aenean consequat facilisis sapien. Nulla
-auctor, wisi vel semper ornare, augue augue facilisis turpis, a
-laoreet quam libero quis erat. Vestibulum sagittis. Duis blandit
-laoreet tortor. Nulla mattis. Morbi eget turpis. Praesent mi. Nunc
-enim leo, blandit ut, sagittis at, pharetra sit amet, dui. Praesent
-porta tortor a ligula rutrum dapibus.
+% Computer vision history
+Computer vision is a field that focused on the process of acquiring, analyzing, and ultimately extracting knowledge and getting comprehensive understanding of the input image. The input image can take many forms such as still image (black and white or colored image), video sequences, multiple input from multiple cameras, and also input from other related sensor. This field has strong ties with other field such as artificial intelligence, machine learning, and robotic.
 
-Integer pellentesque, orci consequat suscipit pharetra, sem eros
-tempor orci, non ultricies massa justo vitae nunc. Nunc sagittis.
-Vestibulum egestas quam at eros. Curabitur consectetuer, magna vel
-gravida varius, tortor augue congue tellus, quis gravida nulla risus
-nec diam. Aliquam commodo dapibus risus. Vestibulum lacinia lectus sed
-nisl. Sed libero purus, tincidunt non, sagittis nec, sodales quis,
-nulla. Sed tortor tortor, viverra et, hendrerit eu, accumsan
-sollicitudin, mi. Suspendisse potenti. Maecenas non wisi sed urna
-mollis dignissim. Aenean at ligula. Vestibulum porta. Donec mauris.
-Donec scelerisque rutrum elit. Aenean ultrices, eros vel sollicitudin
-semper, dui lacus hendrerit metus, id ultricies arcu arcu id mi. In
-eget sapien sed lorem cursus eleifend.
+Two of the most common typical tasks are object recognition and object detection. Object recognition tries to predict and identify what class of object is contained inside an image. In detection case, not only the class of the object, the position itself must also be located, usually by marking a tight bounding box closely surrounding the object. Both are challenging problems that are still being actively researched today.
 
-\part{Important Results}
+% Reason for difficulty
+There are many factors that can be attributed as to why the object recognition and its kind are hard. One reason is simply because the natural representation of image as 2D matrix of pixels value hold little to no direct information that can be used to distinguish different object. Figure \ref{fig:car} shows this example. Another factor is the high dimensionsionality of the data. A standard high definition colored image with the size of 1280x720 can contains up to 2764800 dimensions.
 
-\chapter{First One}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{image/car.png}
+\label{fig:car}
+\caption{The image as 2D matrix of pixels.}
+\end{figure}
 
-Aliquam et ante. Vivamus ultricies, neque eget iaculis interdum, lacus
-quam hendrerit sapien, vel posuere justo nulla vitae arcu. Morbi
-magna. Aliquam erat volutpat. Aenean mattis consequat nibh. Donec
-lobortis sapien a enim. Cras mattis ultricies mi. Quisque venenatis.
-Phasellus risus justo, vulputate non, tristique in, tristique vel,
-neque. Phasellus pretium, dui nec dapibus laoreet, ligula enim laoreet
-eros, tempus interdum massa turpis quis dolor. Etiam ultricies
-condimentum neque. Maecenas pellentesque. Duis tortor. Aliquam ac
-dolor. Vestibulum nisl. Nunc facilisis tincidunt mi. Morbi feugiat
-velit vitae velit. Suspendisse potenti. Maecenas eget ante. Maecenas
-blandit, urna at varius lacinia, lorem purus ullamcorper risus, non
-pretium arcu libero at odio.
+Furthermore, there are many variations that can happen which makes same identical object to have very different appearances in the image. This can be due to viewing changes (translation, rotation, or scale change), change of illumination, occlusion, and so on. There are also intrinsic difference of object from the same class. Figure \ref{fig:objects} illustrates this example.
 
-\section{Preliminaries}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{image/cars.png}
+\label{fig:cars}
+\caption{Object with different appearances from the same class}
+\end{figure}
 
-Vestibulum dolor dolor, interdum eu, iaculis scelerisque, auctor at,
-mi. Nullam ut erat quis sem bibendum dignissim. Vestibulum volutpat
-nisl in tortor. Etiam pretium nulla et elit. Integer tortor. Ut metus
-ligula, egestas non, ornare vel, bibendum eu, urna. Pellentesque
-rutrum dui vel orci. Aliquam lacus lacus, varius a, sodales vitae,
-egestas a, purus. Integer varius venenatis odio. Pellentesque dui
-mauris, lacinia in, placerat lobortis, tempor ac, lectus.
+% The importance of features
+All this boils down to finding the best representation or features of the said object. An ideal representation would be highly discriminative of different class of object but captures the intrinsic similarity between object from the same class. It also has to be invariant to the object transformation (translation, rotation, and scale invariant), usually have lower number of dimension, and also fast and easy to compute.
 
-\subsection{Remarks}
+[illustration of features]
 
-Sed lobortis neque non mauris. Maecenas rhoncus tempor justo. Nunc vel
-diam at dolor luctus tincidunt. Ut egestas. Aliquam eu turpis eu nisl
-ultricies sollicitudin. Donec erat odio, fermentum id, malesuada id,
-viverra vitae, lorem. Morbi scelerisque sagittis enim. Donec non ante
-sed neque dictum consectetuer. Etiam bibendum odio quis est. Quisque
-mollis magna et odio. Nunc nulla. Suspendisse magna felis, tincidunt
-in, blandit non, tempus vel, orci.
+% Handcrafted features
+Many studies have proposed a wide array of feature extraction techniques. Until very recently, Scale-Invariant Feature Transform (SIFT) and Histogram of Oriented Gradients (HOG) are the leading technique for feature extraction and produced decent performance. Both are similar in the sense that both first get the gradient in the image and then count the gradient based on their direction into a histogram.
 
-\subsection{Definitions}
+[photo of SIFT output]
+[photo of HOG output]
 
-Sed laoreet tellus in massa. Fusce egestas dapibus wisi. Pellentesque
-sit amet nulla. Donec dignissim rutrum urna. Integer et mi at urna
-viverra vestibulum. Nullam justo tortor, vulputate nec, porta non,
-consequat ac, lectus. Sed ligula. Nullam tristique. Nullam pulvinar.
-Morbi at elit et lacus tristique nonummy. Vivamus nunc ante, imperdiet
-at, luctus non, aliquam a, neque. In interdum sapien et wisi.
-Curabitur ipsum justo, consequat eget, viverra eu, porta vel, lacus.
-Suspendisse potenti. Proin wisi. In tristique neque at ipsum.
-Phasellus ac justo eu nibh faucibus lobortis. Vestibulum lorem.
+Some study extends these features into mid-level representation by clustering nearby features (using k-means clustering for example) and construct the so-called visual word. However, this kind of hand-engineered features still cannot reach the level of human performance.
 
-Duis blandit est id diam. Sed aliquet semper arcu. Curabitur sed eros
-ut neque eleifend sagittis. Cras lacinia, nisl a sagittis scelerisque,
-nibh risus varius pede, ac interdum lacus lorem quis quam. Mauris sit
-amet orci a ligula porttitor nonummy. Aliquam malesuada turpis at diam
-semper vestibulum. Phasellus ullamcorper. Aenean ultrices lacus a diam
-lobortis posuere. Duis porttitor euismod turpis. Ut sem nulla, porta
-vel, lacinia eget, rutrum non, justo. Phasellus risus sem, placerat
-at, sodales ac, viverra vitae, magna. Fusce non magna. Mauris varius
-vestibulum eros. Nullam nec quam in tortor ultrices varius. Nulla
-tempus lectus ut tortor.
+This trend shifts, there comes the initiative to learn features directly from the data. This is motivated due to the abundance of image data, mostly coming from the internet. There are two different approaches for this, the unsupervised and supervised learning.
 
-Ut vestibulum diam in lacus. Aenean vestibulum bibendum dolor.
-Praesent in wisi. Aenean ornare faucibus orci. Donec mattis magna et
-dui. Nullam vestibulum lobortis nibh. Etiam ultrices lorem nec est.
-Duis ut nisl. Vivamus risus. Pellentesque habitant morbi tristique
-senectus et netus et malesuada fames ac turpis egestas. Suspendisse
-sagittis, dolor eget ullamcorper elementum, sem erat sagittis dolor,
-sit amet tincidunt quam neque consectetuer quam. Maecenas at quam.
-Etiam gravida. Sed nec enim. Fusce pulvinar. In pede metus, lobortis
-a, ullamcorper quis, commodo vitae, turpis. Maecenas sed mi sit amet
-odio suscipit ornare. Phasellus pede arcu, elementum sed, elementum
-eu, viverra et, ligula. Aliquam metus nisl, convallis et, ultrices
-vel, consequat quis, felis. Aenean gravida euismod urna.
+Unsupervised feature learning work without label. It tries to learn generic features of object, regardless of their class. It is more advantageous because most of the data comes unlabeled and the process to get the labels can be expensive.
 
-\section{The Main Theorem}
+One technique that implement this idea is Sparse Autoencoder. It is a variant of neural network with the number of hidden neuron less than the dimension of the input. It forces the network to learn compressed representation of the image.
 
-Aliquam quis nibh quis justo elementum viverra. Vestibulum ipsum.
-Integer sit amet urna id lorem condimentum pretium. Nam adipiscing
-lobortis purus. Donec at libero id augue interdum vulputate. Curabitur
-imperdiet suscipit metus. Curabitur ac quam sed lacus accumsan
-posuere. Quisque pharetra mi sit amet enim. Curabitur quis elit. Lorem
-ipsum dolor sit amet, consectetuer adipiscing elit. Sed ultricies
-aliquet lorem. Proin posuere tincidunt diam. Donec quis orci non leo
-elementum nonummy. Donec urna lectus, fringilla at, tempus id, auctor
-a, wisi. Pellentesque habitant morbi tristique senectus et netus et
-malesuada fames ac turpis egestas. Suspendisse blandit. Nam wisi.
-Phasellus egestas lacus ut lorem. Suspendisse sapien. Fusce non dolor
-ac odio tempus placerat.
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.3]{image/autoencoder.png}
+\label{fig:autoencoder}
+\caption{The features learned from MNIST dataset. Each image correspond to edge at different location and orientation.}
+\end{figure}
 
-\subsection{Problem Statement}
+Supervised feature learning works with labeled image. One technique that successfully implement this idea is Convolutional Neural Network (ConvNet). This method is getting popular with the success of the seminal work of Krizhevsky et al that produce stellar performance on the ImageNet large scale recognition problem \cite{krizhevsky2012}. 
 
-Suspendisse id mauris a justo venenatis feugiat. Quisque volutpat,
-ligula et fermentum volutpat, lectus magna tincidunt urna, a dignissim
-augue sem eu ipsum. Aliquam vitae pede. Sed ullamcorper faucibus erat.
-Aenean vehicula augue at dui. Donec adipiscing aliquet ligula. Sed sed
-libero at enim ornare molestie. Suspendisse tristique sodales wisi. In
-sit amet orci. In hac habitasse platea dictumst. Cras pede. Ut elit.
+Part of this success can also be attributed to the abundance of labeled training data. ImageNet contains 1.2 million training images from 1000 different categories. Another factor is the advance in Graphical Processing Unit (GPU) which makes training large amount of data feasible. Combining these factor with the learning capacity of a ConvNet, makes the result possible.
 
-Morbi eu augue. Praesent in dui. Pellentesque habitant morbi tristique
-senectus et netus et malesuada fames ac turpis egestas. Phasellus
-felis. Morbi eleifend sagittis quam. Mauris imperdiet purus vel arcu.
-Proin quis risus. Cum sociis natoque penatibus et magnis dis
-parturient montes, nascetur ridiculus mus. Mauris massa justo, iaculis
-nec, commodo suscipit, faucibus at, nunc. Phasellus libero risus,
-ultrices eu, congue eu, sollicitudin et, tortor. Integer ante turpis,
-malesuada vel, sagittis nec, porta ut, dolor. Integer ultricies
-blandit odio. Praesent et leo sit amet ipsum nonummy sodales.
+Further research has showed that the feature produced from this network to be highly discriminative, even with different task and dataset. Study by Razavian et al. \cite{razavian2014} shows that the features coming from the last second fully-connected of ConvNet trained on ImageNet with simple linear classifier such as Support Vector Machine (SVM) produced top and near state-of-the-art performance in many typical vision tasks such as object classification, fine-grained recognition, and image retrieval. 
 
-\subsection{The Proof}
+[Visualization of features learned from ConvNet that generalize well to other dataset]
 
-Suspendisse aliquam fringilla tortor. Nullam lacinia rutrum orci. Cras
-pellentesque iaculis ligula. Fusce elit enim, nonummy ut, fermentum
-sed, nonummy a, nunc. Suspendisse potenti. Nunc tortor dolor, eleifend
-non, aliquam sit amet, vestibulum id, erat. Curabitur imperdiet.
-Quisque in velit. Etiam a urna sed turpis scelerisque tempor. Praesent
-in dolor eget massa congue aliquet. Praesent magna lacus, dictum a,
-accumsan a, sollicitudin vel, nibh. Phasellus accumsan porta tortor.
-Curabitur mauris. Quisque ut wisi. Sed aliquet molestie mi. Quisque ut
-magna. Vivamus rhoncus urna in libero.
+The result is pushed even further by finetuning the network with the target dataset. Finetuning works by taking the previously trained network, for example, the AlexNet, and retrain it with target dataset. This works particularly well, rather than training the network from beginning, especially if the target dataset has limited number of training data. This kind of learning, transfer learning, has been reported to produce better result on many occasions \cite{azizpour2014}.
 
-Nullam tristique tempus neque. Nunc ac tortor lobortis felis nonummy
-lacinia. Pellentesque vestibulum facilisis quam. Aliquam aliquam,
-lorem eget elementum euismod, urna dui rutrum libero, a imperdiet erat
-augue ut ipsum. Morbi gravida turpis ut sapien. Aliquam ante sapien,
-ultricies at, vulputate non, ullamcorper quis, dolor. Quisque velit
-turpis, consectetuer vitae, facilisis feugiat, volutpat eget, nunc.
-Quisque quis ipsum in diam elementum vulputate. Donec convallis sapien
-ut tellus. Cras dictum turpis nec sem. Nunc augue. Aliquam nunc
-tortor, semper vel, aliquam at, tempus ut, risus. Mauris feugiat nunc
-id justo. Nunc ullamcorper magna vel urna. Morbi rutrum massa non
-sapien. Fusce purus. Cras magna. In condimentum augue ac libero. Nulla
-lacinia vulputate leo. Mauris lobortis molestie turpis.
+One of the latest example that utilize this power of finetuning is the algorithm Region with CNN (RCNN). RCNN is a object detection algorithm that combines the highly discriminative features with a better search strategy. RCNN employs region proposal algorithm, selective search, that return ~2000 regions that is very likely to contain object. These two makes RCNN to get state-of-the-art result on benchmark dataset and made impressive improvement over previous methods.
 
-Pellentesque neque odio, ornare a, hendrerit ac, vestibulum sit amet,
-tortor. Vestibulum ante ipsum primis in faucibus orci luctus et
-ultrices posuere cubilia Curae; Phasellus malesuada porta sem. Nunc
-wisi neque, lobortis at, consequat sit amet, pulvinar eget, mauris.
-Aliquam egestas, arcu ut tristique tempus, urna lorem pulvinar nisl,
-at auctor lectus sem ut felis. Duis hendrerit, mi et varius venenatis,
-nibh libero blandit mauris, bibendum pellentesque sapien dolor quis
-velit. Vivamus nec augue ut velit eleifend accumsan. Fusce euismod.
-Phasellus volutpat. Donec sollicitudin. Donec non mi eu lorem suscipit
-tincidunt. Suspendisse vehicula. Integer iaculis diam ac quam.
-Pellentesque velit mi, pulvinar eget, suscipit sed, rhoncus ut,
-tortor. Etiam ultricies, wisi non ornare rutrum, ipsum nunc posuere
-leo, vitae blandit est enim eu massa. Nulla sed felis vel nunc
-eleifend venenatis. Sed non purus. Aliquam enim. Nulla neque massa,
-elementum sit amet, rhoncus vel, rhoncus in, leo.
+This thesis work tries to extends the usability of RCNN. The standard RCNN needs the exact bounding box annotation for each object in the image for finetuning. However, this kind of annotation is more expensive than simply labeling the whole image. Therefore, we tries to bypass this needs and figure out a way to finetune with only whole image label. This kind of learning between the fully supervised and unsupervised is dubbed as weakly supervised learning.
 
-In convallis pellentesque quam. Fusce venenatis neque id justo.
-Aliquam felis. Nullam vitae eros. Sed sit amet lorem. Vestibulum
-elementum purus in nunc. Phasellus nec libero non ipsum ultrices
-porttitor. Vestibulum ante ipsum primis in faucibus orci luctus et
-ultrices posuere cubilia Curae; Praesent quis elit sed eros bibendum
-tempor. Suspendisse tempor congue nisl. Nam a est. Aliquam erat
-volutpat. Quisque tincidunt. Donec egestas dapibus diam. Aenean ante
-mi, vulputate vitae, adipiscing in, fermentum luctus, wisi. In nibh
-mauris, ultricies a, fermentum eget, faucibus pharetra, neque. Cras
-consectetuer congue ipsum. Nulla eu metus. Sed at turpis.
+The proposed general setup is as follows. First, we use a region proposal algorithm that can give confidence score that shows how likely a region to contain object. There are several possible candidates such as objectness \cite{obj} and EdgeBoxes. Hosang et al. \cite{hosang2014} provide extensive review of popular algorithm and then outline their strength and flaws. We pick top k regions and then extract them into individual image and and give the label from their source, whole image label.
+
+These regions are then used for finetuning ConvNet that has previously been trained using ImageNet 1.2 million training images in 300,000 more iterations. This finetuned network will then be fed to the standard RCNN pipeline. The performance will be assessed using PASCAL 2007 detection dataset. It will be compared to the non-finetuned network, finetuned network with object bounding box annotation, and network finetuned with whole image.
+
+
+\chapter{Literature Review}
+\section{Convolutional Network (ConvNet)}
+Convolutional Neural Network (ConvNet) is a variant of a standard neural network.
+
+\section{Region with CNN}
+
+\section{Weakly Supervised Object Detection}
+There are wide body of research in the realm of weakly supervised object detection.
+
+
+\chapter{Experiment and Result}
+\section{Dataset}
+The dataset used is PASCAL Visual Object Class 2007. This dataset contains nearly 10000 images of 20 different visual classes.
+
+To validate, first we perform the baseline, as done in the RCNN paper.
+
+\bibliographystyle{plain}
+\bibliography{ref.bib}
 
 \appendix
 \addappheadtotoc
