@@ -7,6 +7,7 @@
 \usepackage{modifications}
 
 \usepackage{graphicx}
+\usepackage{amsmath}
 
 % Put title here
 \title{Weakly Supervised Object Detection: (Working title)}
@@ -146,21 +147,101 @@ These regions are then used for finetuning ConvNet that has previously been trai
 
 \chapter{Literature Review}
 \section{Convolutional Network (ConvNet)}
-Convolutional Neural Network (ConvNet) is a variant of a standard neural network.
+Convolutional Neural Network (ConvNet) is a variant of a standard neural network. Here in this section, the development of neural network leading up to ConvNets is briefly described.
 
+\subsection{Artificial Neural Network}
+% Single neuron
+The first neuron model is proposed by McCulloch and Pitts  In this case, the input vector is multiplied with a weight vector. If this value exceed certain threshold, then this network is firing.
+
+[figure of neuron]
+
+Or in other words $ y = $ where $ a = \sum x_i * w_i $.
+\begin{equation}
+	\begin{cases}
+	1 & \text{if } x \geq \theta \\
+	0 & \text{otherwise}
+	\end{cases}
+\end{equation}
+
+To update the network, there are two alternative. The perceptron rule or Delta rule.
+
+Delta rule, also known as Widrow-Hoff rule, before the output
+
+This kind of architecture act as linear classifier.
+
+% Multi level neural network
+This layer can be stacked to become a multi-layer network. Popularized as Multi Layer Perceptron even though it is not using perceptron learning rule. The caveat is then how to update the weight of the network, because we only know the error from the last layer.
+
+The solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the learning update formula. This update formula is known as Backpropogation.
+
+Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$.
+[plot sigmoid function]
+
+This network can be used to approximate all functions, given enough hidden neuron.
+
+\subsection{ConvNet}
+A Convolutional Neural Network (ConvNet) is a variant of the multi layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are sensitive, called receptive field.
+
+There are several different paradigms of ConvNet than regular network.
+The first is sparse connectivity. A neuron in this case do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer i only need to be connected to limited number of spatially adjacent neuron on layer i-1.
+This correlates with the receptive field concept.
+[figure sparse]
+
+The second is shared weight. Creating a feature maps. This will ensure that the distinct features will be detected regardless of their position in the image.
+It also reduces the number of parameter that needs to be trained.
+[figure shared]
+
+Another important concept is max-pooling. Max-pooling partitions the image into non-overlapping rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
+
+
+There are other design by choice.
+First, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$
+This vector. However, as ReLU is not differentiable at all points, a conjugate gradients is used and a little modification is used
+[plot relu]
+Dropout, for regularization to prevent overfit.
+
+Maybe the most famous ConvNet, the AlexNet.
+[figure of alexnet]
+
+This network is composed of 5 convolutional layers, followed by 2 fully-connected layers and softmax layer to generate prediction.
+This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance and fire.
+
+In the past, before ConvNet dominates, a bag of visual word using combined features from HOG, SIFT, and LBP is used.
 
 \section{Region with CNN (RCNN)}
 RCNN is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 and ImageNet detection problem.
 
-\section{Weakly Supervised Object Detection}
-There are wide body of research in the realm of weakly supervised object detection.
+Object proposal
+There is a big shift in how object detection is performed in past. Not so long ago, a densely sampled sliding window is performed to check the location of an object exhaustively in every possible position, scale, and aspect ratio. This can be too time-consuming.
 
+By utilizing multiple cues. Then the time saved can be invested into better and more complicated representation.
+Selective Search performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm. The grouping is done based on multiple criterion. Higher number of proposal is obtained from combining the result from different parameters.
+Hosang et al. provide comprehensive evaluation of popular object proposal algorithm.
+
+Domain specific fine-tuning.
+Labeled data are scarce. RCNN alleviate this by using supervised pre-training of. In this thesis, we use pre-trained model provided by Caffe.
+
+First, RCNN extract region proposal, around 2,000 proposal for each image using region proposal algorithm such as Selective Search. Then each region is warped to match the size of the ConvNet network. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier.
+
+[figure rcnn system]
+
+One benefit of RCNN is the decoupling of feature extraction and region detection. This way, we can use possibly a smarter region proposal algorithm, or use different representation using stronger network.
 
 \chapter{Experiment and Result}
 \section{Dataset}
 The dataset used is PASCAL Visual Object Class 2007. This dataset contains nearly 10000 images of 20 different visual classes.
 
 To validate, first we perform the baseline, as done in the RCNN paper.
+
+We are using Caffe.
+Caffe is designed so an experiment parameter can be changed by changing the parameter prototxt file.
+There is a pre-trained model which mimic, with different. It is reported 2\% accuracy different.
+
+This is the result.
+
+We then finetune the network with. The strategy is as defined in the paper. Every region with 0.5 is considered as positive samples and.
+
+Because the number of samples can easily reach million of datapoints, negative hard mining is performed.
 
 \bibliographystyle{plain}
 \bibliography{ref.bib}
