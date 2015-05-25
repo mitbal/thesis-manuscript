@@ -151,81 +151,113 @@ Convolutional Neural Network (ConvNet) is a variant of a standard neural network
 
 \subsection{Artificial Neural Network}
 % Single neuron
-The first neuron model is proposed by McCulloch and Pitts  In this case, the input vector is multiplied with a weight vector. If this value exceed certain threshold, then this network is firing.
-
-[figure of neuron]
-
-Or in other words $ y = $ where $ a = \sum x_i * w_i $.
+The first neuron model is proposed by McCulloch and Pitts. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this network is firing. In other words $ a = \sum x_i w_i $ and:
 \begin{equation}
+y = 
 	\begin{cases}
-	1 & \text{if } x \geq \theta \\
+	1 & \text{if } a \geq \theta \\
 	0 & \text{otherwise}
 	\end{cases}
 \end{equation}
 
-To update the network, there are two alternative. The perceptron rule or Delta rule.
+This type of neuron is also called Threshold Logic Unit (TLU). Figure \ref{fig:neuron} illustrates this concept.
 
-Delta rule, also known as Widrow-Hoff rule, before the output
+[figure of neuron]
 
-This kind of architecture act as linear classifier.
+To update the the weight of the network to learn from the data, there are two popular update rules, the perceptron rule and the delta rule. Perceptron rule was originally perceived by Rosenblatt \cite{rosenblatt1957} where you just simply add the input vector to the weight vector if the output is misclassified. In other words:
+\begin{equation}
+\delta w = (t-y) w
+\end{equation}
+where $t$ is the target output and $y$ is the output of the network.
+
+There is a convergence theorem that states that if the data is linearly separable, then the perceptron learning rule will eventually converge, no matter the learning rate. However, perceptron suffer from the early stopping where if there were no training error, the network stopped learning even though the resulted network still has large validation error.
+
+Delta rule, also known as Widrow-Hoff rule, works by minimizing a loss function. This loss function is defined as the sum of the difference between the target label and the output of the network with linear activation function. The delta rule empirically generalize better than perceptron. The update rule is defined as:
+\begin{equation}
+\delta w = (t-y) w
+\end{equation}
+
+However, this two type of networks can only produce linear classifier. Even some kind of simple non-linear problem such as XOR problem cannot be solved.
 
 % Multi level neural network
-This layer can be stacked to become a multi-layer network. Popularized as Multi Layer Perceptron even though it is not using perceptron learning rule. The caveat is then how to update the weight of the network, because we only know the error from the last layer.
+One layer of neuron can be stacked to form multi layer neural network. The layer is usually called hidden layer with its neuron called hidden neuron. The input for the next layer is simply the output of the previous layer. It has been shown that this kind of network can be used to approximate all function, given sufficiently enough hidden neuron.
 
-The solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the learning update formula. This update formula is known as Backpropogation.
+[figure multi layer]
+
+The caveat is then how to update the weight of the network, because we only know the error from the last layer. e solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the learning update formula. This update formula is known as Backpropogation.
 
 Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$.
 [plot sigmoid function]
 
-This network can be used to approximate all functions, given enough hidden neuron.
-
-\subsection{ConvNet}
-A Convolutional Neural Network (ConvNet) is a variant of the multi layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are sensitive, called receptive field.
+\subsection{ConvNet}A Convolutional Neural Network (ConvNet) is a variant of the multi layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are sensitive, called receptive field.
 
 There are several different paradigms of ConvNet than regular network.
-The first is sparse connectivity. A neuron in this case do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer i only need to be connected to limited number of spatially adjacent neuron on layer i-1.
-This correlates with the receptive field concept.
+The first is sparse connectivity. A neuron in this case do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer i only need to be connected to limited number of spatially adjacent neuron on layer i-1. This correlates with the receptive field concept.
 [figure sparse]
 
-The second is shared weight. Creating a feature maps. This will ensure that the distinct features will be detected regardless of their position in the image.
-It also reduces the number of parameter that needs to be trained.
+The second is shared weight. It means that the weight is the same for different parts of the input. This will ensure that the distinct features will be detected regardless of their position in the input. It also reduces the number of parameter that needs to be trained.
 [figure shared]
+
+This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in ConvNet we are trying to learn the most discriminative kernel that can distinguish different objects instead of designing it by hand.
 
 Another important concept is max-pooling. Max-pooling partitions the image into non-overlapping rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
 
-
 There are other design by choice.
-First, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$
-This vector. However, as ReLU is not differentiable at all points, a conjugate gradients is used and a little modification is used
+First, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. This solves the problem of vanishing gradients. As the network gets deeper, the gradient getting close to zero, which makes the network to hardly learn anything.
 [plot relu]
-Dropout, for regularization to prevent overfit.
 
-Maybe the most famous ConvNet, the AlexNet.
+Dropout, for regularization to prevent overfit. This is done to prevent co-habitation and force the neuron to independently learn the features.
+
+Maybe the most famous ConvNet, the AlexNet, which changed the landscape of computer vision research.
 [figure of alexnet]
 
 This network is composed of 5 convolutional layers, followed by 2 fully-connected layers and softmax layer to generate prediction.
 This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance and fire.
 
+This kind of network with more than 1 hidden layer is popular with the name of the so-called deep learning. The main advantage of this system is the first layer can learn primitive feature such as edge and corner, meanwhile the deeper layer can learn the even better layer created from combination of this 
+
+[features learned from ConvNet, layer by layer]
+
 In the past, before ConvNet dominates, a bag of visual word using combined features from HOG, SIFT, and LBP is used.
 
+\section{Object Proposal}
+There is a shift in object detection scene. Not so long ago, a densely sampled sliding window is taken at all possible position and scale. It worked well, for example in the case of face detection \cite{violajones}. But when we start to take account general object detection with different aspect ratio, the search space is simply become too big to fully explore. A standard image can produce up to million of windows to be evaluated.
+
+It is usually class-agnostic as it does not care what class is it.
+
+Some notable algorithms are briefly described here.
+Objectness \cite{alexe} with multiple cues such as color.
+
+Binarized Normed Gradient (BING) works by learning a generic object identifier in the form that can be generated fast \cite{bing}.
+
+Selective Search \cite{selectivesearch} performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm \cite{felzenszwalb}. The grouping is done based on multiple criterion. Higher number of proposal is obtained from combining the result from different parameters.
+
+EdgeBoxes work by using and using smart data structure to quickly compute and evaluate possible regions.
+
+Some algorithms provided ranking as some sort of confidence whether the region contains object or not. For a complete treatment of popular object proposal, consult the work of Hosang et al. \cite{hosang}.
+
 \section{Region with CNN (RCNN)}
-RCNN is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 and ImageNet detection problem.
-
-Object proposal
-There is a big shift in how object detection is performed in past. Not so long ago, a densely sampled sliding window is performed to check the location of an object exhaustively in every possible position, scale, and aspect ratio. This can be too time-consuming.
-
-By utilizing multiple cues. Then the time saved can be invested into better and more complicated representation.
-Selective Search performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm. The grouping is done based on multiple criterion. Higher number of proposal is obtained from combining the result from different parameters.
-Hosang et al. provide comprehensive evaluation of popular object proposal algorithm.
+Region with CNN (RCNN) is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 detection set and ImageNet detection problem. The main contribution of RCNN is by combining the new paradigm of feature learning with finetuning and object proposal.
 
 Domain specific fine-tuning.
-Labeled data are scarce. RCNN alleviate this by using supervised pre-training of. In this thesis, we use pre-trained model provided by Caffe.
+Labeled data are scarce. RCNN alleviate this by using supervised pre-training of. The discriminative power
 
-First, RCNN extract region proposal, around 2,000 proposal for each image using region proposal algorithm such as Selective Search. Then each region is warped to match the size of the ConvNet network. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier.
+The general framework of RCNN is as follows. First, RCNN use region proposal algorithm Selective Search to generate around 2,000 proposal for each image. Then each region is warped to match the size of the ConvNet network. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier.
 
 [figure rcnn system]
 
 One benefit of RCNN is the decoupling of feature extraction and region detection. This way, we can use possibly a smarter region proposal algorithm, or use different representation using stronger network.
+
+[some detection result of RCNN]
+
+\section{Weakly Supervised Object Detection}
+Object detection that do not need is called weakly supervised object detection. This is for some reason you do not need bounding box annotation which may not readily available. The tedious process can also insert bias and error into the dataset. 
+
+Here are some latest and notable result in weakly supervised world.
+Some works by siapaya use hidden topic learning to group subwindows that possibly come from the same category \cite{siapaya}.
+Cinbis et al. treat it as multiple instance problem, and used multi-fold approach where the data is divided into train and validation part. The SVM is trained and then it is used to refine the localization of the validation part.
+
+However, due to time constraint, we are only performing the finetuning and treat the SVM classifier with the bounding box annotation. To accommodate, for example by using the work of Cinbis et al. \cite{cinbis} is left for future works.
 
 \chapter{Experiment and Result}
 \section{Dataset}
@@ -237,11 +269,28 @@ We are using Caffe.
 Caffe is designed so an experiment parameter can be changed by changing the parameter prototxt file.
 There is a pre-trained model which mimic, with different. It is reported 2\% accuracy different.
 
+As for the RCNN code itself, the author provided the github directory: .
+
 This is the result.
+The first result is using the pre-trained caffenet. This result will act as lower bound for the rest of the experiment.
+
+The second experiment is by running RCNN with finetuned network with bounding box annotation. This will act as upper bound.
 
 We then finetune the network with. The strategy is as defined in the paper. Every region with 0.5 is considered as positive samples and.
 
 Because the number of samples can easily reach million of datapoints, negative hard mining is performed.
+
+We tried to build several models. The first, most simple approach is to finetune the network with whole image. In PASCAL, one image can contains many object from different classes.
+
+If we try to include more training image, it is fear that it will corrupt the network with noise.
+
+This might turned out to be.
+
+\section{Discussion}
+As can be seen on the. Judging from the plot of loss and accuracy during finetuning, it seems like the network is not learning at all.
+This can probably be attributed to the low number of training images.
+
+Another part that has not been done is the weakly supervised learning in SVM side. The SVM training still needs the full bounding box annotations to train.
 
 \bibliographystyle{plain}
 \bibliography{ref.bib}
