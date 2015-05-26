@@ -151,7 +151,7 @@ Convolutional Neural Network (ConvNet) is a variant of a standard neural network
 
 \subsection{Artificial Neural Network}
 % Single neuron
-The first neuron model is proposed by McCulloch and Pitts. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this network is firing. In other words $ a = \sum x_i w_i $ and:
+The first neuron model is proposed by McCulloch and Pitts \cite{mcculloch1943neuron}. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this network is firing. In other words $ a = \sum x_i w_i $ and:
 \begin{equation}
 y = 
 	\begin{cases}
@@ -162,7 +162,12 @@ y =
 
 This type of neuron is also called Threshold Logic Unit (TLU). Figure \ref{fig:neuron} illustrates this concept.
 
-[figure of neuron]
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/neuron.png}
+\label{fig:neuron}
+\caption{Standard model of a neuron}
+\end{figure}
 
 To update the the weight of the network to learn from the data, there are two popular update rules, the perceptron rule and the delta rule. Perceptron rule was originally perceived by Rosenblatt \cite{rosenblatt1957} where you just simply add the input vector to the weight vector if the output is misclassified. In other words:
 \begin{equation}
@@ -182,21 +187,42 @@ However, this two type of networks can only produce linear classifier. Even some
 % Multi level neural network
 One layer of neuron can be stacked to form multi layer neural network. The layer is usually called hidden layer with its neuron called hidden neuron. The input for the next layer is simply the output of the previous layer. It has been shown that this kind of network can be used to approximate all function, given sufficiently enough hidden neuron.
 
-[figure multi layer]
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/multilayer.png}
+\end{figure}
 
 The caveat is then how to update the weight of the network, because we only know the error from the last layer. e solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the learning update formula. This update formula is known as Backpropogation.
 
-Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$.
-[plot sigmoid function]
+Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$. Figure \ref{fig:sigmoid} shows the plotting.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/sigmoid.png}
+\label{fig:sigmoid}
+\caption{Sigmoid function.}
+\end{figure}
 
 \subsection{ConvNet}A Convolutional Neural Network (ConvNet) is a variant of the multi layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are sensitive, called receptive field.
 
 There are several different paradigms of ConvNet than regular network.
 The first is sparse connectivity. A neuron in this case do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer i only need to be connected to limited number of spatially adjacent neuron on layer i-1. This correlates with the receptive field concept.
-[figure sparse]
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/sparse.png}
+\label{fig:sparse}
+\caption{Illustration between different connection. (a) Densely connected network connect all neuron from previous layer to the current one. (b) Sparsely connected network only connect limited number of neuron. In this case it is 3 spatially adjacent neurons.}
+\end{figure}
 
 The second is shared weight. It means that the weight is the same for different parts of the input. This will ensure that the distinct features will be detected regardless of their position in the input. It also reduces the number of parameter that needs to be trained.
-[figure shared]
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/shared.png}
+\label{fig:shared}
+\caption{Shared weight. Weight connection with the same color have the same value.}
+\end{figure}
 
 This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in ConvNet we are trying to learn the most discriminative kernel that can distinguish different objects instead of designing it by hand.
 
@@ -204,12 +230,23 @@ Another important concept is max-pooling. Max-pooling partitions the image into 
 
 There are other design by choice.
 First, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. This solves the problem of vanishing gradients. As the network gets deeper, the gradient getting close to zero, which makes the network to hardly learn anything.
-[plot relu]
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/relu.png}
+\label{fig:relu}
+\caption{Rectified Linear Unit. It is simply a linear activation function where value below zero is squashed to zero.}
+\end{figure}
 
 Dropout, for regularization to prevent overfit. This is done to prevent co-habitation and force the neuron to independently learn the features.
 
 Maybe the most famous ConvNet, the AlexNet, which changed the landscape of computer vision research.
-[figure of alexnet]
+\begin{figure}
+\centering
+\includegraphics[scale=0.35]{image/alexnet.png}
+\label{fig:alexnet}
+\caption{The architecture of alexnet.}
+\end{figure}
 
 This network is composed of 5 convolutional layers, followed by 2 fully-connected layers and softmax layer to generate prediction.
 This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance and fire.
@@ -267,9 +304,9 @@ To validate, first we perform the baseline, as done in the RCNN paper.
 
 We are using Caffe.
 Caffe is designed so an experiment parameter can be changed by changing the parameter prototxt file.
-There is a pre-trained model which mimic, with different. It is reported 2\% accuracy different.
+There is a pre-trained model which mimic, with different. It is reported 2\% accuracy different. This network will then be referred throughout the rest of this thesis as caffenet.
 
-As for the RCNN code itself, the author provided the github directory: .
+As for the RCNN code itself, the author provide it online in a github repository: .
 
 This is the result.
 The first result is using the pre-trained caffenet. This result will act as lower bound for the rest of the experiment.
