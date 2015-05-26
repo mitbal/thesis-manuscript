@@ -8,6 +8,7 @@
 
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{bm}
 
 % Put title here
 \title{Weakly Supervised Object Detection: (Working title)}
@@ -147,11 +148,11 @@ These regions are then used for finetuning ConvNet that has previously been trai
 
 \chapter{Literature Review}
 \section{Convolutional Network (ConvNet)}
-Convolutional Neural Network (ConvNet) is a variant of a standard neural network. Here in this section, the development of neural network leading up to ConvNets is briefly described.
+In this section, the development of neural network leading up to ConvNets is briefly summarized.
 
 \subsection{Artificial Neural Network}
 % Single neuron
-The first neuron model is proposed by McCulloch and Pitts \cite{mcculloch1943neuron}. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this network is firing. In other words $ a = \sum x_i w_i $ and:
+The first neuron model is proposed by McCulloch and Pitts \cite{mcculloch1943neuron}. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the neuron's weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this neuron is firing. In other words $ a = \sum x_i w_i $ and:
 \begin{equation}
 y = 
 	\begin{cases}
@@ -160,62 +161,66 @@ y =
 	\end{cases}
 \end{equation}
 
-This type of neuron is also called Threshold Logic Unit (TLU). Figure \ref{fig:neuron} illustrates this concept.
+This type of neuron is also called Threshold Logic Unit (TLU). Figure \ref{fig:neuron} illustrates the concept of this type of neuron.
 
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{image/neuron.png}
+\includegraphics[scale=0.3]{image/neuron.png}
 \label{fig:neuron}
-\caption{Standard model of a neuron}
+\caption{Standard model of a neuron.}
 \end{figure}
 
-To update the the weight of the network to learn from the data, there are two popular update rules, the perceptron rule and the delta rule. Perceptron rule was originally perceived by Rosenblatt \cite{rosenblatt1957} where you just simply add the input vector to the weight vector if the output is misclassified. In other words:
+To update the the weight of the network to learn from the data, there are two update rules that is usually used, the perceptron rule and the delta rule. Perceptron rule was originally perceived by Rosenblatt \cite{rosenblatt1957perceptron} where to update the neuron we can just simply add the input vector to the weight vector if the output is misclassified. In other words: 
 \begin{equation}
-\delta w = (t-y) w
+\begin{split}
+\Delta w & = \alpha (t-y) \bm{x} \\
+w(t+1) & = w(t) + \Delta w
+\end{split}
 \end{equation}
-where $t$ is the target output and $y$ is the output of the network.
+where $\bm{x}$ is the input vector, $alpha$ is the learning rate, $t$ is the target output, and $y$ is the output of the network.
 
 There is a convergence theorem that states that if the data is linearly separable, then the perceptron learning rule will eventually converge, no matter the learning rate. However, perceptron suffer from the early stopping where if there were no training error, the network stopped learning even though the resulted network still has large validation error.
 
 Delta rule, also known as Widrow-Hoff rule, works by minimizing a loss function. This loss function is defined as the sum of the difference between the target label and the output of the network with linear activation function. The delta rule empirically generalize better than perceptron. The update rule is defined as:
 \begin{equation}
-\delta w = (t-y) w
+\begin{split}
+\Delta w & = \alpha (t-y) g'(a) \bm{x} \\
+w(t+1) & = w(t) + \Delta w
+\end{split}
 \end{equation}
+where $a$ is the dot product between input vector and weight vector and $g'$ is the derivative of the activation function used. It is pretty similar with perceptron, with the exception of different activation function.
 
-However, this two type of networks can only produce linear classifier. Even some kind of simple non-linear problem such as XOR problem cannot be solved.
+However, this type of networks has limitation that it can produce linear classifier. Even some kind of simple non-linear problem such as XOR problem cannot be solved. One way to alleviate this problem is by stacking one layer of neural network on top of other to build a multi-layer neural network. The input for the next layer is simply the output from the previous layer. The layer in the middle between input and output vector is usually called hidden layer. It has been shown that this kind of network with one hidden layer can be used to approximate any continuous function given sufficient hidden neuron \cite{cybenko1989}. Figure \ref{fig:multilayer} shows one instance of a multi-layer neural network.
 
-% Multi level neural network
-One layer of neuron can be stacked to form multi layer neural network. The layer is usually called hidden layer with its neuron called hidden neuron. The input for the next layer is simply the output of the previous layer. It has been shown that this kind of network can be used to approximate all function, given sufficiently enough hidden neuron.
-
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{image/multilayer.png}
+\includegraphics[scale=0.4]{image/multilayer.png}
+\label{fig:multilayer}
+\caption{One example of a multi-layer neural network. In this case, the input have 5 dimensions, there are 4 hidden neuron, and 2 target classes.}
 \end{figure}
 
-The caveat is then how to update the weight of the network, because we only know the error from the last layer. e solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the learning update formula. This update formula is known as Backpropogation.
+The caveat is then how to update the weight of the network, because we only know the error from the last layer. The found solution is by using threshold-like function, such as sigmoid function, and then performing chain rule to derive the update formula for each weight in different layers. This update formula is called Backpropogation \cite{rumelhart1986backprop}. Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$. Figure \ref{fig:sigmoid} shows the plot of a sigmoid function.
 
-Two popular choice for sigmoid function is $\frac{1-e^{-x}}{1+e^{-x}}$ or $arctan(x)$. Figure \ref{fig:sigmoid} shows the plotting.
-
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{image/sigmoid.png}
 \label{fig:sigmoid}
 \caption{Sigmoid function.}
 \end{figure}
 
-\subsection{ConvNet}A Convolutional Neural Network (ConvNet) is a variant of the multi layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are sensitive, called receptive field.
+\subsection{ConvNet}
+A Convolutional Neural Network (ConvNet) is a variant of the multi-layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are highly sensitive, called receptive field. It is first proposed by Lecun et al. for document handwriting recognition \cite{lecun}.
 
-There are several different paradigms of ConvNet than regular network.
-The first is sparse connectivity. A neuron in this case do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer i only need to be connected to limited number of spatially adjacent neuron on layer i-1. This correlates with the receptive field concept.
+There are two different paradigms that implement this receptive field concept. The first is sparse connectivity. A neuron in this network do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer $i$ only need to be connected to limited number of spatially adjacent neuron on layer $i-1$. Figure \ref{fig:sparse} illustrates this concept.
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{image/sparse.png}
 \label{fig:sparse}
 \caption{Illustration between different connection. (a) Densely connected network connect all neuron from previous layer to the current one. (b) Sparsely connected network only connect limited number of neuron. In this case it is 3 spatially adjacent neurons.}
 \end{figure}
 
-The second is shared weight. It means that the weight is the same for different parts of the input. This will ensure that the distinct features will be detected regardless of their position in the input. It also reduces the number of parameter that needs to be trained.
+The second paradigm is shared weight. It means that the weight are the same for all neurons on the same layer, usually called as feature map. This will ensure that the distinct features will be detected regardless of their position in the input. Figure \ref{fig:shared} illustrate the concept.
 
 \begin{figure}
 \centering
@@ -224,23 +229,9 @@ The second is shared weight. It means that the weight is the same for different 
 \caption{Shared weight. Weight connection with the same color have the same value.}
 \end{figure}
 
-This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in ConvNet we are trying to learn the most discriminative kernel that can distinguish different objects instead of designing it by hand.
+This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in ConvNet we are trying to learn the most discriminative kernel that can distinguish different objects instead of designing it by hand. It also has the advantage of having fewer parameter to train than a fully connected one.
+This become the basis of the work of Krizhevsky et al. that change the landscape of computer vision.
 
-Another important concept is max-pooling. Max-pooling partitions the image into non-overlapping rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
-
-There are other design by choice.
-First, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. This solves the problem of vanishing gradients. As the network gets deeper, the gradient getting close to zero, which makes the network to hardly learn anything.
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{image/relu.png}
-\label{fig:relu}
-\caption{Rectified Linear Unit. It is simply a linear activation function where value below zero is squashed to zero.}
-\end{figure}
-
-Dropout, for regularization to prevent overfit. This is done to prevent co-habitation and force the neuron to independently learn the features.
-
-Maybe the most famous ConvNet, the AlexNet, which changed the landscape of computer vision research.
 \begin{figure}
 \centering
 \includegraphics[scale=0.35]{image/alexnet.png}
@@ -248,28 +239,47 @@ Maybe the most famous ConvNet, the AlexNet, which changed the landscape of compu
 \caption{The architecture of alexnet.}
 \end{figure}
 
-This network is composed of 5 convolutional layers, followed by 2 fully-connected layers and softmax layer to generate prediction.
-This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance and fire.
+Figure \label{fig:alexnet} shows the architecture of said network. This network is composed of 5 convolutional layers, each followed by a max-pooling layer and Rectified Linear Unit (ReLU), followed by 2 fully-connected layers and lastly softmax layer to generate prediction. This network used three additional to boost the performance.
 
-This kind of network with more than 1 hidden layer is popular with the name of the so-called deep learning. The main advantage of this system is the first layer can learn primitive feature such as edge and corner, meanwhile the deeper layer can learn the even better layer created from combination of this 
+First is max-pooling. Max-pooling partitions the image into non-overlapping rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
+
+Second, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. This solves the problem of vanishing gradients that often happen when training a deep, multi-layer neural network with backpropagation. As the gradient goes deeper from the output layer to the hidden layer, the gradient value quickly diminish to zero which makes the network slow to learn.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/relu.png}
+\label{fig:relu}
+\caption{Rectified Linear Unit. It is simply a linear activation function where value below zero is discarded and return as 0.}
+\end{figure}
+
+Third, Dropout as regularization method to prevent overfitting. This is done by setting the output of the neuron to 0 with 50\% probability. As a result it prevents neuron co-habitation and forces each neuron to independently learn the robust features.
+
+This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance on ImageNet Large Scale Visual Recognition Competition (ILSVRC) \cite{alexnet} with a large margin, over 10\% different than the previous winner.
 
 [features learned from ConvNet, layer by layer]
 
-In the past, before ConvNet dominates, a bag of visual word using combined features from HOG, SIFT, and LBP is used.
+\subsection{ConvNet as Black-box feature descriptor+Finetuning}
+ConvNet works great for ImageNet. However, to train this large network with hideous number of parameter, a large number of training data and computation time and power is also required. This what is hinder.
+
+However, surprisingly, it has been discovered. Now we can just take, and then train a linear SVM on top of this extracted features.
+Study by Razavian et al. \cite{razavian}
+
+Finetuning is performed by taking the previously trained network, and then replacing the last layer. Usually the learning rate is reduced for every other weights except that last replaced layer.
 
 \section{Object Proposal}
 There is a shift in object detection scene. Not so long ago, a densely sampled sliding window is taken at all possible position and scale. It worked well, for example in the case of face detection \cite{violajones}. But when we start to take account general object detection with different aspect ratio, the search space is simply become too big to fully explore. A standard image can produce up to million of windows to be evaluated.
 
-It is usually class-agnostic as it does not care what class is it.
+By producing 1000 to 2000 high quality region proposal, the process can be significantly speed up. It can also produce better result by reducing the number of false positive detection.
 
-Some notable algorithms are briefly described here.
-Objectness \cite{alexe} with multiple cues such as color.
+Some notable algorithms are briefly described here. 
 
-Binarized Normed Gradient (BING) works by learning a generic object identifier in the form that can be generated fast \cite{bing}.
+% Explain Objectness \cite{alexe}.
+
+% Explain Binarized Normed Gradient (BING) \cite{bing}.
 
 Selective Search \cite{selectivesearch} performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm \cite{felzenszwalb}. The grouping is done based on multiple criterion. Higher number of proposal is obtained from combining the result from different parameters.
 
-EdgeBoxes work by using and using smart data structure to quickly compute and evaluate possible regions.
+EdgeBoxes work by using edge and using smart data structure to quickly compute and evaluate possible regions.
 
 Some algorithms provided ranking as some sort of confidence whether the region contains object or not. For a complete treatment of popular object proposal, consult the work of Hosang et al. \cite{hosang}.
 
@@ -277,7 +287,7 @@ Some algorithms provided ranking as some sort of confidence whether the region c
 Region with CNN (RCNN) is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 detection set and ImageNet detection problem. The main contribution of RCNN is by combining the new paradigm of feature learning with finetuning and object proposal.
 
 Domain specific fine-tuning.
-Labeled data are scarce. RCNN alleviate this by using supervised pre-training of. The discriminative power
+Labeled data are scarce. RCNN alleviate this by using supervised pre-training of
 
 The general framework of RCNN is as follows. First, RCNN use region proposal algorithm Selective Search to generate around 2,000 proposal for each image. Then each region is warped to match the size of the ConvNet network. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier.
 
@@ -300,24 +310,32 @@ However, due to time constraint, we are only performing the finetuning and treat
 \section{Dataset}
 The dataset used is PASCAL Visual Object Class 2007. This dataset contains nearly 10000 images of 20 different visual classes.
 
-To validate, first we perform the baseline, as done in the RCNN paper.
+The measurement used is average precision. This is a more accurate assessment than simply accuracy.
 
+\section{Program}
 We are using Caffe.
 Caffe is designed so an experiment parameter can be changed by changing the parameter prototxt file.
-There is a pre-trained model which mimic, with different. It is reported 2\% accuracy different. This network will then be referred throughout the rest of this thesis as caffenet.
+There is a pre-trained model which mimic, with slightly different. It is reported 2\% accuracy different. This network will then be referred throughout the rest of this thesis as caffenet.
+
+Caffe also provide a model zoo, where researcher all around the world can provide a model they are trained with different architecture. It will be interesting to compare with latest network.
 
 As for the RCNN code itself, the author provide it online in a github repository: .
 
-This is the result.
+\section{Experiment}
+
 The first result is using the pre-trained caffenet. This result will act as lower bound for the rest of the experiment.
 
 The second experiment is by running RCNN with finetuned network with bounding box annotation. This will act as upper bound.
+
+There is a solid improvement of 8\% from previous experiment. This solidify the hypothesis that finetuning to the target dataset really works.
 
 We then finetune the network with. The strategy is as defined in the paper. Every region with 0.5 is considered as positive samples and.
 
 Because the number of samples can easily reach million of datapoints, negative hard mining is performed.
 
 We tried to build several models. The first, most simple approach is to finetune the network with whole image. In PASCAL, one image can contains many object from different classes.
+
+The second model, we try to include image with multiple. As caffe in the time of this writing have not support multi label, we list multiple times as different data.
 
 If we try to include more training image, it is fear that it will corrupt the network with noise.
 
