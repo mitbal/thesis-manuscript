@@ -267,44 +267,53 @@ Study by Razavian et al. \cite{razavian}
 Finetuning is performed by taking the previously trained network, and then replacing the last layer. Usually the learning rate is reduced for every other weights except that last replaced layer.
 
 \section{Object Proposal}
-There is a shift in object detection scene. Not so long ago, a densely sampled sliding window is taken at all possible position and scale. It worked well, for example in the case of face detection \cite{violajones}. But when we start to take account general object detection with different aspect ratio, the search space is simply become too big to fully explore. A standard image can produce up to million of windows to be evaluated.
+% Traditional approach
+There is a big shift in object detection world. Previously, a densely sampled sliding window is taken at all possible position and scale. It worked well, for example in the case of face detection \cite{violajones}. But when we start to take into account general object detection with different aspect ratio, the search space is simply become too big to fully explore. A standard image can produce up to million of windows to be evaluated. This can become prohibitively too slow to process.
 
-By producing 1000 to 2000 high quality region proposal, the process can be significantly speed up. It can also produce better result by reducing the number of false positive detection.
+[image of sliding windows]
 
-Some notable algorithms are briefly described here. 
+% object proposal
+Recent approach prefer to generate 1000-2000 candidate windows with high likelihood to contain object. The criteria to generate this boxes vary between algorithm, for example, by exploiting segmentation. It has the advantage of significantly speeding up the detection process. It can also produce better result by reducing the number of false positive rate.
 
-% Explain Objectness \cite{alexe}.
+[Example of object proposal. Notice, how is located near the object in the image]
 
-% Explain Binarized Normed Gradient (BING) \cite{bing}.
+% Explain objectness
+Some notable algorithms are briefly described here.
+Objectness \cite{alexe2012objectness} tries to create generic object measure to distinguish object windows from background ones. It use multiple cues such as multi-scale saliency, color contrast, edge density. It also introduces a new criterion based on the location and size of the window int he image itself, ignoring the pixels value inside the windows. It can generates up to 2000 windows in 4 seconds, in average.
 
-Selective Search \cite{selectivesearch} performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm \cite{felzenszwalb}. The grouping is done based on multiple criterion. Higher number of proposal is obtained from combining the result from different parameters.
+% Explain selective search
+Selective Search \cite{selectivesearch} performs hierarchical grouping from oversegmented region produced from Felzenszwalb and Huttenlocher graph segmentation algorithm \cite{felzenszwalb}. The grouping is done based on multiple criterion, such as color similarity, texture similarity, size (small regions should be fused with another small regions first), and fill to close gaps between regions. Higher number of proposal is obtained from combining the result from different parameters of such grouping.
 
-EdgeBoxes work by using edge and using smart data structure to quickly compute and evaluate possible regions.
+[selective search steps]
 
-Some algorithms provided ranking as some sort of confidence whether the region contains object or not. For a complete treatment of popular object proposal, consult the work of Hosang et al. \cite{hosang}.
+% Explain Binarized Normed Gradient (BING)
+BING \cite{bing} tries to distinguish object windows by looking at the norm of the gradient of the image window after it has been resized to small fixed size (e.g. 8x8). The approximated, binarized version of this which utilize binary operation such as ADD and BITWISE SHIFT, is very fast. It can achieved up to 300 frame per second on a single laptop CPU.
+
+% Explain EdgeBoxes
+EdgeBoxes \cite{zitnick2014edgeboxes} try to generate object bounding box proposals directly from edges. It used the observation that the number of contours fully enclosed by a bounding box shows how likely it is to contain object. It also used smart data structure to quickly generate the bounding box.
+
+[edgeboxes]
+
+% Penutup
+Some algorithms provided ranking as some sort of confidence whether the region contains object or not. For a complete treatment of popular object proposal algorithm, refer the work of Hosang et al. \cite{hosang}.
 
 \section{Region with CNN (RCNN)}
-Region with CNN (RCNN) is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 detection set and ImageNet detection problem. The main contribution of RCNN is by combining the new paradigm of feature learning with finetuning and object proposal.
 
-Domain specific fine-tuning.
-Labeled data are scarce. RCNN alleviate this by using supervised pre-training of
+Object detection is a harder problem than object classification. Unlike classification, detection requires the location of the object inside the image. The second challenge is the number of labeled training data is scarce. The current amount of training data is insufficient to train a large ConvNet from scratch in order to get good feature representation.
 
-The general framework of RCNN is as follows. First, RCNN use region proposal algorithm Selective Search to generate around 2,000 proposal for each image. Then each region is warped to match the size of the ConvNet network. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier.
+Region with CNN features (RCNN) is the latest object detection algorithm that producing state-of-the-art result on many benchmark dataset such as PASCAL 2007 detection set and ImageNet detection problem. RCNN first solve the localization problem by using bottom up region proposal to get candidate object bounding boxes. For the second problem, RCNN use pre-trained ConvNet on large dataset (ILSRVC) followed by domain-specific fine-tuning on target dataset (PASCAL).
+
+The general framework of RCNN is as follows. First, RCNN use class-independent region proposal algorithm such as Selective Search to generate around 2,000 proposals for each image. Then each region is warped to a fixed size to match the size of the input of the ConvNet. The features from the last fully-connected layer are then extracted. This features is then classified using pre-trained SVM classifier. Figure \ref{rcnn} shows the diagram of the RCNN system. Some detection results is showed in Figure \ref{rcnn_detect}.
 
 [figure rcnn system]
-
-One benefit of RCNN is the decoupling of feature extraction and region detection. This way, we can use possibly a smarter region proposal algorithm, or use different representation using stronger network.
 
 [some detection result of RCNN]
 
 \section{Weakly Supervised Object Detection}
-Object detection that do not need is called weakly supervised object detection. This is for some reason you do not need bounding box annotation which may not readily available. The tedious process can also insert bias and error into the dataset. 
+Object detection usually needs the object bounding boxes annotation to train the detector. However, this kind of data is rarely available and it is more expensive to obtain compare to whole image label. Therefore, it is beneficial if we can train a detector without this additional annotation. Techniques that implement this kind of data is termed weakly supervised object detection.
 
-Here are some latest and notable result in weakly supervised world.
-Some works by siapaya use hidden topic learning to group subwindows that possibly come from the same category \cite{siapaya}.
-Cinbis et al. treat it as multiple instance problem, and used multi-fold approach where the data is divided into train and validation part. The SVM is trained and then it is used to refine the localization of the validation part.
-
-However, due to time constraint, we are only performing the finetuning and treat the SVM classifier with the bounding box annotation. To accommodate, for example by using the work of Cinbis et al. \cite{cinbis} is left for future works.
+Here we give brief review on some of the most common and notable algorithms in this field. Work by Wang et al. \cite{wang2014lcl}, called Latent Category Learning (LCL), try to learn hidden subcategory for each region using probabilistic Latent Semantic Analysis. He then also uses ConvNet as feature representation and SVM for classification.
+Cinbis et al. \cite{cinbis2014mil} treat this problem as multiple instance learning and use multi-fold approach where the data is divided into train and validation part. The SVM is trained on training data and then it is used to refine the localization of the validation part. This process is performed iteratively for every fold.
 
 \chapter{Experiment and Result}
 \section{Dataset}
