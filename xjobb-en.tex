@@ -315,60 +315,103 @@ Object detection usually needs the object bounding boxes annotation to train the
 Here we give brief review on some of the most common and notable algorithms in this field. Work by Wang et al. \cite{wang2014lcl}, called Latent Category Learning (LCL), try to learn hidden subcategory for each region using probabilistic Latent Semantic Analysis. He then also uses ConvNet as feature representation and SVM for classification.
 Cinbis et al. \cite{cinbis2014mil} treat this problem as multiple instance learning and use multi-fold approach where the data is divided into train and validation part. The SVM is trained on training data and then it is used to refine the localization of the validation part. This process is performed iteratively for every fold.
 
+
 \chapter{Experiment and Result}
+In this section, the dataset, code, and experiment design and their result are explained.
+
 \section{Dataset}
-The dataset used is PASCAL Visual Object Class 2007. This dataset contains nearly 10000 images of 20 different visual classes.
+The dataset used in the experiment is PASCAL Visual Object Classes Challenge 2007 (VOC2007) for detection task \cite{pascal2007}. This dataset contains nearly 10000 images, divided into 2501 images for training, 2510 for validation, and 4952 for testing. There are 24,640 annotated objects from 20 different visual classes. The classes can be divided roughly into several subcategories:
+\begin{enumerate}
+\item Person: person.
+\item Animal: bird, cat, cow, dog, horse, sheep.
+\item Vehicle: aeroplane, bicycle, boat, bus, car, motorbike, train.
+\item Indoor: bottle, chair, dining table, potted plant, sofa, tv/monitor.
+\end{enumerate}
 
-The measurement used is average precision. This is a more accurate assessment than simply accuracy.
+The measurement used is average precision (AP). It is computed from taking the average of precision value at 11 different recall level. This is a better measure than a simple accuracy due to the imbalance of the data. Figure \ref{pascal} shows some example image from this dataset.
 
-\section{Program}
-We are using Caffe.
-Caffe is designed so an experiment parameter can be changed by changing the parameter prototxt file.
-There is a pre-trained model which mimic, with slightly different. It is reported 2\% accuracy different. This network will then be referred throughout the rest of this thesis as caffenet.
+[image pascal dataset]
 
-Caffe also provide a model zoo, where researcher all around the world can provide a model they are trained with different architecture. It will be interesting to compare with latest network.
+\section{Software}
+For the implementation of the ConvNet, we are using Caffe deep learning framework \cite{caffe}, originally developed by Jia and now maintained by Berkeley Vision and Learning Center. Caffe holds several advantages compared to alternative library such as MatConvNet and theano. It is designed to perform experiment with different architecture and parameter with only changing the prototext file, without touching any code at all. It is also pretty easy to switch between CPU and GPU, depending on available hardware. It also boasts fast speed (up to 1 ms for one forward pass) and has live community and extensive documentation.
 
-As for the RCNN code itself, the author provide it online in a github repository: .
+Caffe also provides several pre-trained ConvNet models and architectures. We specifically use the model called BVLC Reference that follows the architecture of alexnet with minor variation. This network will then be referred throughout the rest of this thesis as caffenet. There is also a model zoo, where researchers and scientist worldwide can participate uploading new and different model that can be used with Caffe software. However, testing different architecture for the detection task is out of the scope of this thesis.
+
+As for the RCNN code itself, the author provide it online in a github repository: http://github.com/rbgirshick/rcnn. We just need to provide a model file as one argument to the function.
 
 \section{Experiment}
+We will perform several experiments. The first set of experiment will try to reproduce the result of RCNN on VOC07 dataset. For the second set of experiment, we will look at the effect of several strategies of finetuning the network with weak label.
 
-The first result is using the pre-trained caffenet. This result will act as lower bound for the rest of the experiment.
+\subsection{Baseline}
+\subsubsection{First experiment, Lower bound}
+The first experiment will be using RCNN code with pre-trained caffenet. The average precision for all 20 classes are listed on Table \ref{tab:lower}. The precision-recall curve for all classes is shown on Figure \ref{fig:pr_lower}.
 
-The second experiment is by running RCNN with finetuned network with bounding box annotation. This will act as upper bound.
+[table]
+[precision recall]
 
-There is a solid improvement of 8\% from previous experiment. This solidify the hypothesis that finetuning to the target dataset really works.
+This result will act as lower bound for the rest of the experiment. It is hoped that any finetuning performed on the 
 
-We then finetune the network with. The strategy is as defined in the paper. Every region with 0.5 is considered as positive samples and.
+\subsubsection{Second Experiment, Upper bound}
+For the second experiment, the caffenet model will first be finetuned using VOC2007 dataset.
 
-Because the number of samples can easily reach million of datapoints, negative hard mining is performed.
+From each image, around 2000 windows are extracted using Selective Search region proposal algorithm. The regions are chosen as positive training data for finetuning if they at least have 0.3 overlap with any object bounding boxes. Any region with 0 overlap is picked as negative data. The finetuning is 100,000 iterations, with 0.001 learning rate $\alpha$ for all layers except the last one, which is 0.01. The learning rate is reduced every 20,000 iterations by multiplying the current $\alpha$ with gamma value of 0.1. Figure \ref{finetuned_rcnn} shows the plot of loss and accuracy at each iteration.
 
-We tried to build several models. The first, most simple approach is to finetune the network with whole image. In PASCAL, one image can contains many object from different classes.
+[loss]
+[accuracy]
 
-The second model, we try to include image with multiple. As caffe in the time of this writing have not support multi label, we list multiple times as different data.
+This finetuned network is then used for the RCNN code input. The average precision for all classes is listed in table \ref{tab:finetuned_rcnn}.
 
-If we try to include more training image, it is fear that it will corrupt the network with noise.
+[table]
+[precision recall]
 
-This might turned out to be.
+There is a solid improvement of 8\% from previous experiment. This add to the mounting evidence that finetuning with target dataset helps, however little.
+
+\subsection{Weakly Finetuning}
+In this section we now try to finetune the caffenet with only whole image label, without the bounding box annotation. There are several strategies that can be chosen and they are will be explained in the next section.
+
+\subsubsection{First model, whole image}
+For the first model, we just simply finetune the caffenet with whole image. Because one image can have multiple objects from different classes, in this experiment, we only picked image with. This reduce the number of training data to just around 3,000. We then finetuned with the same parameter as previous experiment. Figure \ref{finetuned_whole} shows the plot of loss and accuracy.
+
+[figure]
+[table]
+
+\subsubsection{Second model}
+For the second model, we tried to insert multiple. For images with multiple labels, we simply list them several times in the training file list, each time with different labels. This double the number of training data to 7,000. The finetuning process is using the same parameter as above experiment.
+
+[plot loss and accuracy]
+[table]
+
+\subsubsection{Third model}
+For this third model using region to finetune the network. We used the top 5 region for each image produced using EdgeBoxes region proposal algorithm. The region is filtered, only region with the size of at least 30\% of image size get picked as training data. The number of training data for finetuning is around 3,000. This data is then used for finetuning with the same parameter as previous experiment.
+
+[plot loss and accuracy]
+[table]
+
+\subsubsection{Fourth model}
+For the fourth model, we tried to increase the number of training data by using top 10 regions. This doubles the number into 7,000.
+
+[plot loss and accuracy]
+[table]
+
+\subsubsection{Fifth model}
+For the fifth model, we include all images with multiple labels, therefore each region can have multiple labels, just like second model. We are also using top 5 region from EdgeBoxes region proposal algorithm. The total number of training data reach more than 11,000.
+
+[plot loss and accuracy]
+
+The average precision can be seen on table \ref{tab:model5}.
+
+[table]
 
 \section{Discussion}
-As can be seen on the. Judging from the plot of loss and accuracy during finetuning, it seems like the network is not learning at all.
-This can probably be attributed to the low number of training images.
-
-Another part that has not been done is the weakly supervised learning in SVM side. The SVM training still needs the full bounding box annotations to train.
+Based from the result of all experiment above, there are several early conclusion to be drawn. First, feature from to different task than it was trained for (detection as opposed to classification) and different dataset (VOC2007 as opposed to Imagenet). Second, finetuning with data from new, target dataset can improve the result. However, there are still difficulties to finetune for detection task if we only have label for the whole image and not the bounding box annotation.
 
 \bibliographystyle{plain}
 \bibliography{ref.bib}
 
 \appendix
 \addappheadtotoc
-\chapter{RDF}\label{appA}
+\chapter{Finetune}\label{appA}
 
-\begin{figure}[ht]
-\begin{center}
-And here is a figure
-\caption{\small{Several statements describing the same resource.}}\label{RDF_4}
-\end{center}
-\end{figure}
+This is appendix.
 
-that we refer to here: \ref{RDF_4}
 \end{document}
