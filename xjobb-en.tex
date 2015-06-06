@@ -317,10 +317,10 @@ Cinbis et al. \cite{cinbis2014mil} treat this problem as multiple instance learn
 
 
 \chapter{Experiment and Result}
-In this section, the dataset, code, and experiment design and their result are explained.
+This section will briefly. First the dataset used in the experiment will be briefly introduced. Then all the code necessary will also be explained. The experiment setup and designs and their result will be elaborated. It will then be closed with a discussion regarding the results and what to make out of it.
 
 \section{Dataset}
-The dataset used in the experiment is PASCAL Visual Object Classes Challenge 2007 (VOC2007) for detection task \cite{pascal2007}. This dataset contains nearly 10000 images, divided into 2501 images for training, 2510 for validation, and 4952 for testing. There are 24,640 annotated objects from 20 different visual classes. The classes can be divided roughly into several subcategories:
+The dataset used in the experiment is PASCAL Visual Object Classes Challenge 2007 (VOC2007) for detection task \cite{pascal2007}. This dataset contains 9963 images, divided into 2501 images for training, 2510 for validation, and 4952 for testing. There are total 24,640 annotated objects from 20 different visual classes. The classes can be divided roughly into several subcategories:
 \begin{enumerate}
 \item Person: person.
 \item Animal: bird, cat, cow, dog, horse, sheep.
@@ -328,16 +328,21 @@ The dataset used in the experiment is PASCAL Visual Object Classes Challenge 200
 \item Indoor: bottle, chair, dining table, potted plant, sofa, tv/monitor.
 \end{enumerate}
 
-The measurement used is average precision (AP). It is computed from taking the average of precision value at 11 different recall level. This is a better measure than a simple accuracy due to the imbalance of the data. Figure \ref{pascal} shows some example image from this dataset.
+The measurement used is average precision (AP). It is computed from taking the average of precision value at 11 different recall level. This is a better measure than a simple accuracy due to the imbalance of the data. Figure \ref{fig:pascal} shows some example image from this dataset.
 
-[image pascal dataset]
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/pascal_samples.png}
+\label{fig:pascal}
+\caption{Some samples image from VOC2007 all 20 classes.}
+\end{figure}
 
 \section{Software}
-For the implementation of the ConvNet, we are using Caffe deep learning framework \cite{caffe}, originally developed by Jia and now maintained by Berkeley Vision and Learning Center. Caffe holds several advantages compared to alternative library such as MatConvNet and theano. It is designed to perform experiment with different architecture and parameter with only changing the prototext file, without touching any code at all. It is also pretty easy to switch between CPU and GPU, depending on available hardware. It also boasts fast speed (up to 1 ms for one forward pass) and has live community and extensive documentation.
+For the implementation of the ConvNet, we are using Caffe deep learning framework \cite{caffe}, originally developed by Jia and now maintained by Berkeley Vision and Learning Center. Caffe holds several advantages compared to alternative library such as MatConvNet and theano. It is designed to be able to perform experiment with different architecture and parameter with only changing the prototext file, without touching any code at all. It is also pretty easy to switch between CPU and GPU, depending on available hardware. It also boasts fast speed (up to 1 ms for one forward pass) and has live community and extensive documentation.
 
 Caffe also provides several pre-trained ConvNet models and architectures. We specifically use the model called BVLC Reference that follows the architecture of alexnet with minor variation. This network will then be referred throughout the rest of this thesis as caffenet. There is also a model zoo, where researchers and scientist worldwide can participate uploading new and different model that can be used with Caffe software. However, testing different architecture for the detection task is out of the scope of this thesis.
 
-As for the RCNN code itself, the author provide it online in a github repository: http://github.com/rbgirshick/rcnn. We just need to provide a model file as one argument to the function.
+As for the RCNN code itself, the author provide it online in a github repository: http://github.com/rbgirshick/rcnn. We just need to provide a model file as one argument to the function. For the classification part, we use LibLinear SVM \cite{liblinear}, available at: http://www.csie.ntu.edu.tw/~cjlin/liblinear/. For region proposal, we use Selective Search, EdgeBoxes, and Bing. All of them are available online.
 
 \section{Experiment}
 We will perform several experiments. The first set of experiment will try to reproduce the result of RCNN on VOC07 dataset. For the second set of experiment, we will look at the effect of several strategies of finetuning the network with weak label.
@@ -346,23 +351,45 @@ We will perform several experiments. The first set of experiment will try to rep
 \subsubsection{First experiment, Lower bound}
 The first experiment will be using RCNN code with pre-trained caffenet. The average precision for all 20 classes are listed on Table \ref{tab:lower}. The precision-recall curve for all classes is shown on Figure \ref{fig:pr_lower}.
 
-[table]
-[precision recall]
+\begin{table}[h]
+\begin{tabular}{lllllllllllllllllllll}
+aero  & bike  & bird  & boat  & bottle & bus   & car   & cat   & chair & cow   & table & dog   & horse & mbike & person & plant & sheep & sofa  & train & tv    & mAP    \\
+\hline
+57.62 & 60.48 & 42.21 & 31.31 & 25.41  & 52.64 & 59.58 & 49.42 & 22.1  & 41.67 & 34.97 & 45.43 & 45.72 & 55.32 & 42.06  & 22.47 & 46.65 & 34.49 & 51.44 & 58.87 & 43.993
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.3]{image/pr_lower.png}
+\label{fig:pr_lower}
+\caption{The precision-recall curve for all 20 classes.}
+\end{figure}
 
 This result will act as lower bound for the rest of the experiment. It is hoped that any finetuning performed on the 
 
 \subsubsection{Second Experiment, Upper bound}
 For the second experiment, the caffenet model will first be finetuned using VOC2007 dataset.
 
-From each image, around 2000 windows are extracted using Selective Search region proposal algorithm. The regions are chosen as positive training data for finetuning if they at least have 0.3 overlap with any object bounding boxes. Any region with 0 overlap is picked as negative data. The finetuning is 100,000 iterations, with 0.001 learning rate $\alpha$ for all layers except the last one, which is 0.01. The learning rate is reduced every 20,000 iterations by multiplying the current $\alpha$ with gamma value of 0.1. Figure \ref{finetuned_rcnn} shows the plot of loss and accuracy at each iteration.
+From each image, around 2000 windows are extracted using Selective Search region proposal algorithm. The regions are chosen as positive training data for finetuning if they at least have 0.3 overlap with any object bounding boxes. Any region with 0 overlap is picked as negative data. The finetuning is 100,000 iterations, with 0.001 learning rate $\alpha$ for all layers except the last one, which is 0.01. The learning rate is reduced every 20,000 iterations by multiplying the current $\alpha$ with gamma value of 0.1. Figure \ref{fig:finetune_rcnn} shows the plot of loss and accuracy at each iteration.
 
-[loss]
-[accuracy]
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/finetune_rcnn.png}
+\label{fig:finetune_rcnn}
+\caption{Loss and Accuracy plot at finetuning.}
+\end{figure}
 
-This finetuned network is then used for the RCNN code input. The average precision for all classes is listed in table \ref{tab:finetuned_rcnn}.
+This finetuned network is then used for the RCNN code input. The average precision for all classes is listed in table \ref{tab:finetune_rcnn}.
 
-[table]
-[precision recall]
+\begin{table}[h]
+\label{tab:finetune_rcnn}
+\begin{tabular}{lllllllllllllllllllll}
+aero  & bike  & bird  & boat  & bottle & bus   & car   & cat   & chair & cow   & table & dog   & horse & mbike & person & plant & sheep & sofa  & train & tv    & mAP     \\
+57.62 & 60.48 & 42.21 & 31.31 & 25.41  & 52.64 & 59.58 & 49.42 & 22.1  & 41.67 & 34.97 & 45.43 & 45.72 & 55.32 & 42.06  & 22.47 & 46.65 & 34.49 & 51.44 & 58.87 & 43.993  \\
+65.83 & 68.62 & 49.64 & 36.53 & 29.31  & 65.09 & 70.58 & 58.04 & 32.63 & 61.89 & 48.67 & 57.25 & 59.53 & 64.88 & 53.34  & 34.63 & 56.34 & 48.4  & 57.28 & 64.73 & 54.1605
+\end{tabular}
+\end{table}
 
 There is a solid improvement of 8\% from previous experiment. This add to the mounting evidence that finetuning with target dataset helps, however little.
 
@@ -370,10 +397,25 @@ There is a solid improvement of 8\% from previous experiment. This add to the mo
 In this section we now try to finetune the caffenet with only whole image label, without the bounding box annotation. There are several strategies that can be chosen and they are will be explained in the next section.
 
 \subsubsection{First model, whole image}
-For the first model, we just simply finetune the caffenet with whole image. Because one image can have multiple objects from different classes, in this experiment, we only picked image with. This reduce the number of training data to just around 3,000. We then finetuned with the same parameter as previous experiment. Figure \ref{finetuned_whole} shows the plot of loss and accuracy.
+For the first model, we just simply finetune the caffenet with whole image. Because one image can have multiple objects from different classes, in this experiment, we only picked image with. This reduce the number of training data to just around 3,000. We then finetuned with the same parameter as previous experiment. Figure \ref{fig:finetune_whole} shows the plot of loss and accuracy.
 
-[figure]
-[table]
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{image/finetune_whole}
+\label{fig:finetune_whole}
+\caption{Plot of Loss and Accuracy with whole image finetuning.}
+\end{figure}
+
+\begin{table}[h]
+\label{tab:finetune_whole}
+\begin{tabular}{lllllllllllllllllllll}
+aero  & bike  & bird  & boat  & bottle & bus   & car   & cat   & chair & cow   & table & dog   & horse & mbike & person & plant & sheep & sofa  & train & tv    & mAP     \\
+57.62 & 60.48 & 42.21 & 31.31 & 25.41  & 52.64 & 59.58 & 49.42 & 22.1  & 41.67 & 34.97 & 45.43 & 45.72 & 55.32 & 42.06  & 22.47 & 46.65 & 34.49 & 51.44 & 58.87 & 43.993  \\
+52.91 & 60.65 & 36.06 & 32.45 & 20.97  & 46.61 & 56.24 & 42.09 & 18.92 & 38.71 & 34.1  & 41.45 & 45.23 & 55.79 & 38.92  & 25.26 & 43.91 & 28.07 & 50.01 & 51.12 & 40.9735
+\end{tabular}
+\end{table}
+
+the mAP is shown on Table \ref{tab:finetune_whole}. As can be seen, even though there are small increase in several classes, overall the mAP is decreased by 4\% compared to the lower bound result.
 
 \subsubsection{Second model}
 For the second model, we tried to insert multiple. For images with multiple labels, we simply list them several times in the training file list, each time with different labels. This double the number of training data to 7,000. The finetuning process is using the same parameter as above experiment.
