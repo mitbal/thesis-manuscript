@@ -55,18 +55,29 @@
 
 \chapter{Introduction}
 \label{chap:intro}
+This chapter will outline the motivation of this thesis. It will first briefly introduce the field of computer vision, highlighting the importance and challenge of finding the best representations for various image and vision tasks. It will then be followed by quick recap of research and study of finding this features up to the latest work of Convolutional Neural Network. It will then be closed with a proposed study to try to enhance the current methods by using weakly supervised finetuning.
 
+\section{Background}
 % Computer vision history
-Computer vision is a field that focused on the process of acquiring, analyzing, and ultimately extracting knowledge and getting comprehensive understanding of the input image. The input image can take many forms such as still image (black and white or colored image), video sequences, multiple input from multiple cameras, and also input from other related sensor. This field has strong ties with other field such as artificial intelligence, machine learning, and robotic.
+Computer vision is a field that focuses on the process of acquiring, analyzing, and ultimately extracting knowledge and getting comprehensive understanding of the input image. The input image can take many forms such as still image (black and white or colored image), video sequences, multiple input from multiple cameras, and also input from other related sensor. This field has strong ties with other field such as artificial intelligence, machine learning, and robotic.
 
-There are wide range of real world applications for computer vision, starting from simple inspection system in industry and manufacturing process to the creation of robot with artificial intelligence that can interact with  the world around them. Other application include system for navigation (for example autonomous mobile robot and vehicle) and military (security surveillance and missile guidance system).
+There are wide range of real world applications for computer vision, starting from simple inspection systems in industry and manufacturing process to the creation of robot with artificial intelligence that can interact with  the world around them. Other applications include systems for navigation (for example autonomous mobile robot and vehicle) and military (security surveillance and missile guidance system).
 
-Those applications can usually be broken down into several small scale vision tasks. Two of the most typical tasks in computer vision are object recognition and object detection. Object recognition tries to predict and identify what class of object is contained inside an image. In detection case, not only the class of the object, the position itself must also be located, usually by marking a tight bounding box closely surrounding the object. Both are hard, challenging problems that are still being actively researched today.
+Those applications can usually be broken down into several small scale vision tasks. Two of the most typical tasks in computer vision are object recognition and object detection. Object recognition tries to predict and identify what class of objects are contained in an image. In detection case, not only the class of the object, the position itself must also be located, usually by marking a tight bounding box around the object. Both are hard, challenging problems that are actively researched today.
+
+The standard modern recognition system works as follows. Each image has its feature extracted using some kind of feature extraction algorithm into new representation. Then we learned a classifier, such as SVM, on top of this feature. This learned classifier is then used to perform recognition with new data. Figure \ref{fig:scheme} depicts this overall system.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{image/scheme.png}
+\label{fig:scheme}
+\caption{Modern recognition system.}
+\end{figure}
 
 % Reason for difficulty
-There are many factors that can be attributed as to why the object recognition and its kind are hard. One reason is simply because the natural representation of image as 2D matrix of pixels value hold little to no direct information that can be used to distinguish different object. Figure \ref{fig:car} illustrate this example. 
+There are many reasons why we need some kind of feature extraction in order to perform recognition. One reason is simply because the natural representation of an image as the 2D matrix of pixel intensity values holds little to no direct information that can be used to distinguish different objects. Figure \ref{fig:car} illustrates this example. 
 
-This is worsened by the high dimensionality of the data. A standard high definition colored image with the size of 1280x720 can contains up to 2764800 dimensions. Meanwhile the amount of training data rarely exceed or even match this number. This curse of dimensionality can make the training phase to become slow and hard.
+This is worsened by the high dimensionality of the data. A standard high definition colored image of size 1280x720 has 2,764,800 dimensions. Meanwhile the amount of training data rarely exceeds or even matches this number. This curse of dimensionality can make the training phase to become slow and hard.
 
 \begin{figure}[h]
 \centering
@@ -75,7 +86,7 @@ This is worsened by the high dimensionality of the data. A standard high definit
 \caption{The image as 2D matrix of pixels.}
 \end{figure}
 
-Furthermore, there are many variations which makes same identical object to have very different appearances in the image. This can be due to viewing changes (translation, rotation, or scale change), change of illumination, occlusion, and clutter. There are also intrinsic difference of object from the same class. Figure \ref{fig:objects} illustrates this example.
+Furthermore, there are many variations which makes same identical objects to have very different appearances in the image. This can be due to viewing changes (translation, rotation, or scale change), change of illumination, occlusion, and clutter. There are also intrinsic difference between objects from the same class. Figure \ref{fig:cars} illustrates this example.
 
 \begin{figure}[h]
 \centering
@@ -85,7 +96,7 @@ Furthermore, there are many variations which makes same identical object to have
 \end{figure}
 
 % The importance of features
-All this boils down to finding the best representation or features of the said object. An ideal representation would be highly discriminative of different class of object but captures the intrinsic similarity between object from the same class. It also has to be invariant to the object transformation (translation, rotation, and scale invariant), usually have lower number of dimension, and also fast and easy to compute.
+All this boils down to finding the best representation or features of the said object. An ideal representation would be highly discriminative on different classes of object but captures the intrinsic similarity between objects from the same class. It should also be invariant to the geometric transformation (translation, rotation, and scale) of the object, usually have lower number of dimension, and also fast and easy to compute.
 
 Unfortunately, these kind of ideal features do not exist in reality. In practice, we compromise by striking a balance of using adequate number of training data and using a stronger learning algorithm to compensate for the not-so-ideal features. Figure \ref{fig:feature} shows illustration of the ideal features and the not-so-ideal features.
 
@@ -93,51 +104,58 @@ Unfortunately, these kind of ideal features do not exist in reality. In practice
 \centering
 \includegraphics[scale=0.4]{image/ideal_feature.png}
 \label{fig:feature}
-\caption{Illustration of ideal and not-so-ideal features. (a) Ideal feature should have better separability from instance from different class and closely located with object form the same class. (b) Not-so-ideal features plot is jumbled all over the place and have low separability. This, however, can be compensated by using stronger classification algorithm.}
+\caption{Illustration of ideal and not-so-ideal feature representation. (a) Ideal feature should have better separability from instance from different class and closely located with object form the same class. (b) Not-so-ideal features plot is jumbled all over the place and have low separability. This, however, can be compensated by using stronger classification algorithm.}
 \end{figure}
 
 % Handcrafted features
-Many studies have proposed a wide array of feature extraction techniques. Until very recently, Scale-Invariant Feature Transform (SIFT) by Lowe \cite{lowe2004sift} and Histogram of Oriented Gradients (HOG) by Dalal and Triggs \cite{dalal2005hog} are the leading technique for feature extraction and produced decent performance on benchmark dataset. Both are similar in the sense that both first compute the gradient in the image and then count the gradient based on their direction into a histogram.
+Many studies have proposed a wide array of feature extraction techniques. Until very recently, Scale-Invariant Feature Transform (SIFT) by Lowe \cite{lowe2004sift} and Histogram of Oriented Gradients (HOG) by Dalal and Triggs \cite{dalal2005hog} are the leading technique for feature extraction and produced decent performance on benchmark dataset. Both are similar in the sense that both first compute the gradient in the image and then construct a histogram of the gradient orientation weighted by their gradient magnitude.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.4]{image/hog.png}
 \label{fig:hog}
-\caption{Illustration of HOG features applied on image of a person.}
+\caption{Illustration of HOG features applied on image of a person. Image taken from \cite{dalal2005hog}}
 \end{figure}
 
 Some study extends these features into mid-level representation by clustering nearby features (using k-means clustering for example). The number of features that fall into a specific cluster is then aggregated into some bag of visual word. However, this kind of hand-crafted features still cannot reach the level of human performance.
 
-The trend shifts, there comes the initiative to learn the features directly from data. This is partly motivated due to the abundance of image data, mostly coming from the internet. There are two different approaches for this, the unsupervised learning and supervised learning.
+In recent years though the trend has shifted to directly learn the features from the data. This is partly motivated by the abundance of image data, mostly coming from the internet and the ubiquity of digital cameras on mobile devices which makes it easy for users to upload their images. There are two different approaches for feature learning, the unsupervised learning and supervised learning.
 
-Unsupervised feature learning works with image without label. It tries to learn generic features of object, regardless of their class. It is more advantageous because most of the data comes unlabeled and the extra effort to annotate the image with labels can be expensive and time-consuming.
+Unsupervised feature learning works with image without label. It tries to learn generic features of object, regardless of their class. It is more advantageous than its counterpart because even though there are plenty of data, most of them are unlabeled. The extra effort to label them can be too expensive and time-consuming.
 
-One technique that implement this idea is Sparse Autoencoder. In its simplest form, it is a variant of neural network with the number of hidden neuron fewer than the dimension of the input. It then forces the network to learn compressed, low-dimensional representation of the image. Figure \ref{fig:autoencoder} illustrates some example features learned from this network.
+One technique that implement this idea is Sparse Autoencoder. It is a variant of neural network, with the number of hidden neuron fewer than the dimension of the input and output. It can be said to shaped like hourglass. Figure \ref{fig:autoencoder_architecture} shows one example of autoencoder architecture. The objective of such network is to encode the image with fewer parameter and then try to decode it again and reconstruct to get the original image. It will forces the network to learn compressed, low-dimensional representation of the input. Figure \ref{fig:autoencoder} illustrates some example features learned from this network.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{image/autoencoder_architecture.png}
+\label{fig:autoencoder_architecture.png}
+\caption{One example of autoencoder architecture.}
+\end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.3]{image/autoencoder.png}
 \label{fig:autoencoder}
-\caption{The features learned from MNIST dataset. Each image correspond to edge at different location and orientation.}
+\caption{The features learned from MNIST dataset. Each image correspond to edge at different location and orientation. Image taken from http://deeplearning.stanford.edu/wiki/index.php/UFLDL\_Tutorial}
 \end{figure}
 
-Supervised feature learning works with labeled image. One technique that successfully implement this idea is Convolutional Neural Network (ConvNet). It is originally proposed by LeCunn et al. \cite{lecunn1999} for handwriting document classification. This method is starting to gain momentum with the success of the seminal work of Krizhevsky et al. \cite{krizhevsky2012cnn} that produce stellar performance, by beating previous state-of-the-art method by large margin, on the ImageNet large scale recognition problem \cite{imagenet}. 
+Supervised feature learning works with labeled images. One technique that successfully implement this idea is Convolutional Neural Network (ConvNet). This type of network architecture was originally called neocognitron, proposed by Fukushima \cite{fukushima}. Lecun et al. \cite{lecunn1999} then showed how to train such network for handwriting document classification. But this method really become popular with the success of the seminal work by Krizhevsky et al. \cite{krizhevsky2012cnn} that produced a stellar performance by beating previous state-of-the-art method by large margin, on the ImageNet large scale recognition problem \cite{imagenet}. 
 
-Part of this success can also be attributed to the abundance of labelled training data. ImageNet contains 1.2 million labelled training images from 1000 different categories. Another factor is the advance in Graphical Processing Unit (GPU) which makes training large amount of data feasible. Combining these factors with the learning capacity of a ConvNet makes the result possible.
+Part of this success can also be attributed to the abundance of labeled training data. ImageNet contains 1.2 million labeled training images from 1000 different categories. Another factor is the advance in Graphical Processing Unit (GPU) which makes training large amount of data feasible. Combining these factors with the learning capacity of a ConvNet makes the result possible.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.3]{image/cnn.png}
-\label{fig:cnn}
-\caption{Visualization of features learned from ConvNet.}
+\label{fig:convnet_features}
+\caption{Visualization of features learned from ConvNet. Image taken from \cite{zeiler}}
 \end{figure}
-[Visualization of features learned from ConvNet that generalize well to other dataset]
 
-Figure \ref{fig:cnn} shows the example of features learned from a ConvNet, taken from Zeiler and Fergus \cite{zeiler2014} paper. Further research has showed that the feature produced from this network to be highly discriminative, even across different tasks and datasets. Study by Razavian et al. \cite{razavian2014} shows that the features coming from the last second fully-connected of ConvNet trained on ImageNet with simple linear classifier such as Support Vector Machine (SVM) produced top and near state-of-the-art performance in many typical vision tasks such as object classification, fine-grained recognition, and image retrieval. 
+Figure \ref{fig:convnet_features} shows the example of features learned from a ConvNet. Further research has shown that the features produced from the network to be highly discriminative, even across different tasks and datasets. Study by Razavian et al. \cite{razavian2014} shows that the features coming from the second last fully-connected layer of ConvNet trained on ImageNet in combination with a simple linear classifier such as Support Vector Machine (SVM) produced top and near state-of-the-art performance in many typical vision tasks such as object classification, fine-grained recognition, and image retrieval.
 
-The result is pushed even further by finetuning the network with the target dataset. Finetuning works by taking the previously trained network, for example, the AlexNet, and retrain it with target dataset. This works particularly well, rather than training the network from beginning, especially if the target dataset has limited number of training data. This kind of learning, transfer learning, has been reported to produce better result on many occasions \cite{azizpour2014}.
+The result can be pushed even further by finetuning the network with the target dataset. Finetuning works by taking the previously trained network, for example, the AlexNet on ImageNet data, and retrain it with target dataset. This works particularly well, rather than training the network from beginning, especially if the target dataset has limited number of training data. This kind of learning, transfer learning, has been reported to produce better result on many occasions \cite{azizpour2014}.
 
-One of the latest example that utilize this power of finetuning is the algorithm Region with CNN (RCNN). RCNN is a object detection algorithm that combines the highly discriminative features with a better search strategy. RCNN employs region proposal algorithm, selective search, that return ~2000 regions that is very likely to contain object. These two makes RCNN to get state-of-the-art result on benchmark dataset and made impressive improvement over previous methods.
+\section{Proposed Study, Improvement on Object Detection}
+One of the latest example that utilize the power of finetuning is the algorithm called Region with CNN (RCNN) \cite{girshick2014rcnn}. RCNN is object detection algorithm that combines the highly discriminative features from ConvNet with a better search strategy. RCNN employs the region proposal algorithm, selective search, that return ~2000 regions that is very likely to contain object. These two makes RCNN to get state-of-the-art result on benchmark dataset and made impressive improvement over previous methods.
 
 This thesis work tries to extends the usability of RCNN. The standard RCNN needs the exact bounding box annotation for each object in the image for finetuning. However, this kind of annotation is more expensive than simply labeling the whole image. Therefore, we tries to bypass this needs and figure out a way to finetune with only whole image label. This kind of learning between the fully supervised and unsupervised is dubbed as weakly supervised learning.
 
@@ -147,6 +165,7 @@ These regions are then used for finetuning ConvNet that has previously been trai
 
 
 \chapter{Literature Review}
+
 \section{Convolutional Network (ConvNet)}
 In this section, the development of neural network leading up to ConvNets is briefly summarized.
 
