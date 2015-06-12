@@ -117,8 +117,6 @@ Many studies have proposed a wide array of feature extraction techniques. Until 
 \caption{Illustration of HOG features applied on image of a person. Image taken from \cite{dalal2005hog}}
 \end{figure}
 
-Some study extends these features into mid-level representation by clustering nearby features (using k-means clustering for example). The number of features that fall into a specific cluster is then aggregated into some bag of visual word. However, this kind of hand-crafted features still cannot reach the level of human performance.
-
 In recent years though the trend has shifted to directly learn the features from the data. This is partly motivated by the abundance of image data, mostly coming from the internet and the ubiquity of digital cameras on mobile devices which makes it easy for users to upload their images. There are two different approaches for feature learning, the unsupervised learning and supervised learning.
 
 Unsupervised feature learning works with image without label. It tries to learn generic features of object, regardless of their class. It is more advantageous than its counterpart because even though there are plenty of data, most of them are unlabeled. The extra effort to label them can be too expensive and time-consuming.
@@ -165,13 +163,14 @@ These regions are then used for finetuning ConvNet that has previously been trai
 
 
 \chapter{Literature Review}
+In this chapter, we will review briefly important concepts needed on this thesis and outline their importance. First, neural network and its latest iteration, convNet, will be explained. Then, we will moved to explain the recent trend of object proposal for object detection. Then, we are going to elaborate RCNN algorithm, which combines to achieve state-of-the-art object detection on benchmark dataset. Lastly, weakly supervised object detection will be described.
 
 \section{Convolutional Network (ConvNet)}
 In this section, the development of neural network leading up to ConvNets is briefly summarized.
 
 \subsection{Artificial Neural Network}
 % Single neuron
-The first neuron model is proposed by McCulloch and Pitts \cite{mcculloch1943neuron}. This model is a highly simplified version of neuron cell in brain. It works by multiplying the input vector with the neuron's weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as some kind of threshold operation. If this value exceeds certain $\theta$, then this neuron is firing. In other words $ a = \sum x_i w_i $ and:
+The first neuron model is proposed by McCulloch and Pitts \cite{mcculloch1943neuron}. This model is a highly simplified version of a neuron cell in brain. It works by multiplying the input vector with the neuron's weight vector. This value is then fed into an activation function. One activation function that can be used is a step function which acts as threshold operation. If this value exceeds certain $\theta$, then this neuron fires. In other words $ a = \sum x_i w_i $ and:
 \begin{equation}
 y = 
 	\begin{cases}
@@ -209,7 +208,7 @@ w(t+1) & = w(t) + \Delta w
 \end{equation}
 where $a$ is the dot product between input vector and weight vector and $g'$ is the derivative of the activation function used. It is pretty similar with perceptron, with the exception of different activation function.
 
-However, this type of networks has limitation that it can produce linear classifier. Even some kind of simple non-linear problem such as XOR problem cannot be solved. One way to alleviate this problem is by stacking one layer of neural network on top of other to build a multi-layer neural network. The input for the next layer is simply the output from the previous layer. The layer in the middle between input and output vector is usually called hidden layer. It has been shown that this kind of network with one hidden layer can be used to approximate any continuous function given sufficient hidden neuron \cite{cybenko1989}. Figure \ref{fig:multilayer} shows one instance of a multi-layer neural network.
+However, this type of networks has limitation that it can produce classifier with linear decision boundary. Even some kind of simple non-linear problem such as XOR problem cannot be solved. One way to alleviate this problem is by stacking one layer of neural network on top of other to build a multi-layer neural network. The input for the next layer is simply the output from the previous layer. The layer in the middle between input and output vector is usually called hidden layer. It has been shown that this kind of network with one hidden layer can be used to approximate any continuous function given sufficient hidden neuron \cite{cybenko1989}. Figure \ref{fig:multilayer} shows one instance of a multi-layer neural network.
 
 \begin{figure}[h]
 \centering
@@ -228,18 +227,18 @@ The caveat is then how to update the weight of the network, because we only know
 \end{figure}
 
 \subsection{ConvNet}
-A Convolutional Neural Network (ConvNet) is a variant of the multi-layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are highly sensitive, called receptive field. It is first proposed by Lecun et al. for document handwriting recognition \cite{lecun}.
+A Convolutional Neural Network (ConvNet) is a variant of the multi-layer neural network. It is inspired by the visual cortex in retina, where there are small sub-region in the cell that are highly sensitive, called receptive field. This kind of architecture is first published by Fukushima as neocognitron \cite{fukushima}. Then, paper by Lecun et al. \cite{lecunn} showed how train such network and used it to perform document handwriting recognition.
 
-There are two different paradigms that implement this receptive field concept. The first is sparse connectivity. A neuron in this network do not need to be connected to all the neurons from the previous layer. For example, a neuron in layer $i$ only need to be connected to limited number of spatially adjacent neuron on layer $i-1$. Figure \ref{fig:sparse} illustrates this concept.
+There are two different paradigms that implement this receptive field concept, which differentiates ConvNet with standard multi-layer neural network. The first concept is sparse connectivity. A neuron in this network does not need to be connected to all the neurons from the previous layer. For example, a neuron in layer $i$ is only connected to limited number of spatially adjacent neuron on layer $i-1$. Figure \ref{fig:sparse} illustrates this concept.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{image/sparse.png}
 \label{fig:sparse}
-\caption{Illustration between different connection. (a) Densely connected network connect all neuron from previous layer to the current one. (b) Sparsely connected network only connect limited number of neuron. In this case it is 3 spatially adjacent neurons.}
+\caption{Illustration between different connection. (a) Densely connected network: Connect all neurons from the previous layer to the current one. (b) Sparsely connected network: Only connect limited number of neuron. In this case it is 3 spatially adjacent neurons.}
 \end{figure}
 
-The second paradigm is shared weight. It means that the weight are the same for all neurons on the same layer, usually called as feature map. This will ensure that the distinct features will be detected regardless of their position in the input. Figure \ref{fig:shared} illustrate the concept.
+The second paradigm is shared weights. It means that the weight are the same for all neurons on the same layer, usually called a feature map. This will ensure that the distinct features will be detected regardless of their position in the input. Figure \ref{fig:shared} illustrate the concept. 
 
 \begin{figure}
 \centering
@@ -248,19 +247,27 @@ The second paradigm is shared weight. It means that the weight are the same for 
 \caption{Shared weight. Weight connection with the same color have the same value.}
 \end{figure}
 
-This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in ConvNet we are trying to learn the most discriminative kernel that can distinguish different objects instead of designing it by hand. It also has the advantage of having fewer parameter to train than a fully connected one.
-This become the basis of the work of Krizhevsky et al. that change the landscape of computer vision.
+In one layer we can have multiple feature maps. That way, we can learn different kernels from the same input. These feature maps is stacked on top each other and thus we can learn hierarchical features, i.e. features from higher layer is constructed from features from lower layer. Figures \ref{fig:feature_map} illustrate this concept.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{image/feature_map.png}
+\label{fig:feature_map}
+\caption{Illustration of feature map.}
+\end{figure}
+
+This two concepts together ultimately is just a convolution operation of an image with a kernel. Therefore, in a ConvNet we are trying to learn the most discriminative, hierarchical kernel that can distinguish different objects instead of designing them by hand. It also has the advantage of having fewer parameter to train than a fully connected one.
+
+This become the basis of the work of Krizhevsky et al. that changed the landscape of computer vision. Figure \label{fig:alexnet} shows the architecture of said network. This network is composed of 5 convolutional layers, each followed by a max-pooling layer and Rectified Linear Unit (ReLU), followed by 2 fully-connected layers and lastly softmax layer to generate prediction. This network used three additional techniques to boost the performance.
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.35]{image/alexnet.png}
 \label{fig:alexnet}
-\caption{The architecture of alexnet.}
+\caption{The architecture of Alexnet.}
 \end{figure}
 
-Figure \label{fig:alexnet} shows the architecture of said network. This network is composed of 5 convolutional layers, each followed by a max-pooling layer and Rectified Linear Unit (ReLU), followed by 2 fully-connected layers and lastly softmax layer to generate prediction. This network used three additional to boost the performance.
-
-First is max-pooling. Max-pooling partitions the image into non-overlapping rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
+First is max-pooling. Max-pooling partitions the image into rectangular region, and for each region, outputs the maximum value. It has the advantage of reducing the computation cost and also provide some form of translation invariance into the network.
 
 Second, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. This solves the problem of vanishing gradients that often happen when training a deep, multi-layer neural network with backpropagation. As the gradient goes deeper from the output layer to the hidden layer, the gradient value quickly diminish to zero which makes the network slow to learn.
 
@@ -273,15 +280,15 @@ Second, Rectified Linear Unit (ReLU) as the activation function. $max(a, 0)$. Th
 
 Third, Dropout as regularization method to prevent overfitting. This is done by setting the output of the neuron to 0 with 50\% probability. As a result it prevents neuron co-habitation and forces each neuron to independently learn the robust features.
 
-This model is trained using GPU for 2 weeks with 1.2 million training data and achieved state-of-the-art performance on ImageNet Large Scale Visual Recognition Competition (ILSVRC) \cite{alexnet} with a large margin, over 10\% different than the previous winner.
+This model is trained using GPU for 2 weeks with 1.2 million training data, trained with stochastic gradient descent with over 300,000 iterations, and achieved state-of-the-art performance on ImageNet Large Scale Visual Recognition Competition (ILSVRC) \cite{alexnet} with a large margin, over 10\% different than the previous winner.
 
-What makes this kind of network powerful is. The lower layer can learn basic primitive such as edge and corner. This low level feature are then combined in higher layer into a more complex, higher level of representation. Figure \ref{fig:convnet_features} shows this illustrations.
+What makes this kind of network powerful is by using deep, multi-layer neurons, hierarchical features can be learned. The lower layer can learn basic primitive such as edge and corner. This low level feature are then combined in higher layer into a more complex, higher level of representation. Figure \ref{fig:convnet_features} shows this illustrations.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.5]{image/convnet_features.png}
 \label{fig:convnet_features}
-\caption{Features learned from ConvNet, layer by layer. Notice that early layer (left side) learn different edge color and latest layer (right side) learn higher concept such as face of person and cat.}
+\caption{Features learned from ConvNet, layer by layer. Notice that early layer (left side) learn different edge color and latest layer (right side) learn higher concept such as face of person and cat. Taken from \cite{zeiler}}
 \end{figure}
 
 \subsection{ConvNet as Black-box feature descriptor}
